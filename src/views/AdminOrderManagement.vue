@@ -136,11 +136,11 @@
           <div class="mb-6">
             <div class="flex mb-3">
               <label class="w-40 font-semibold text-gray-600">Khách hàng:</label><span>{{ editingOrder.customer_name
-              }}</span>
+                }}</span>
             </div>
             <div class="flex mb-3">
               <label class="w-40 font-semibold text-gray-600">Email:</label><span>{{ editingOrder.customer_email
-              }}</span>
+                }}</span>
             </div>
             <div class="flex mb-3">
               <label class="w-40 font-semibold text-gray-600">Ngày đặt:</label><span>{{
@@ -153,7 +153,7 @@
             <div class="flex mb-3">
               <label class="w-40 font-semibold text-gray-600">Phương thức thanh toán:</label><span>{{
                 getPaymentMethodText(editingOrder.payment_method)
-              }}</span>
+                }}</span>
             </div>
           </div>
           <!-- Form chỉnh sửa trạng thái -->
@@ -206,7 +206,7 @@ import SearchBar from '@/components/AdminSearchBar.vue'
 
 // Cấu hình axios instance
 const axiosInstance = axios.create({
-  baseURL: process.env.VUE_APP_API_URL || 'http://localhost:8000/api/v1',
+  baseURL: process.env.VUE_APP_API_URL || 'https://9ad9-116-110-40-129.ngrok-free.app/api/v1',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

@@ -35,6 +35,7 @@
 </template>
 
 <script>
+import Cookies from 'js-cookie'
 export default {
   data() {
     return {
@@ -55,12 +56,12 @@ export default {
         return;
       }
 
-      const url = 'http://localhost:8000/login';
+      const url = 'https://9ad9-116-110-40-129.ngrok-free.app/login';
 
       try {
         const response = await fetch(url, {
           method: 'POST',
-          credentials: 'include', 
+          credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             user_name: this.username,
@@ -75,6 +76,7 @@ export default {
           setTimeout(() => (this.errorMessage = ''), 5000);
           return;
         }
+        console.log(result);
 
         const user = result.user.data;
         const role = user?.role || 'user';
@@ -82,6 +84,7 @@ export default {
 
         // Lưu session
         localStorage.setItem('user_name', user?.user);
+        Cookies.set('PHPSESSID', user.session_id)
 
         this.showSuccess = true;
         setTimeout(() => {

@@ -66,7 +66,7 @@ import axios from 'axios';
 
 const emit = defineEmits(['close', 'address-selected']);
 
-const apiBaseUrl = process.env.VUE_APP_API_URL || 'http://localhost:8000/api/v1/'
+const apiBaseUrl = process.env.VUE_APP_API_URL || 'https://9ad9-116-110-40-129.ngrok-free.app/api/v1/'
 const addressList = ref([])
 const selectedAddressId = ref(null)
 const loading = ref(false)

@@ -39,7 +39,7 @@ export default {
       console.log("Đăng ký:", this.username, this.password);
 
       try {
-        const response = await fetch('http://localhost:8000/user/register', {
+        const response = await fetch('https://9ad9-116-110-40-129.ngrok-free.app/user/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
