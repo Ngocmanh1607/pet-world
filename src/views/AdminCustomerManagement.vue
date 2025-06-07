@@ -28,10 +28,10 @@
         </thead>
         <tbody>
           <tr v-for="(customer, index) in filteredCustomers" :key="index">
-            <td>{{ customer.id }}</td>
-            <td>{{ customer.name }}</td>
+            <td>{{ customer.customer_id }}</td>
+            <td>{{ customer.customer_name }}</td>
             <td>{{ customer.email }}</td>
-            <td>{{ customer.dob }}</td>
+            <td>{{ customer.date_of_birth }}</td>
             <td>{{ customer.phone }}</td>
             <td>{{ customer.gender }}</td>
             <td class="action-buttons">
@@ -64,10 +64,12 @@ const searchQuery = ref('')
 // Gọi API lấy danh sách khách hàng
 onMounted(async () => {
   try {
-    const response = await fetch('https://9ad9-116-110-40-129.ngrok-free.app/customers')
+    const response = await fetch('http://localhost:8000/customers', { credentials: 'include' })
     if (!response.ok) throw new Error('Không thể tải danh sách khách hàng')
     const data = await response.json()
-    customers.value = data
+    customers.value = data.customers
+    console.log(data);
+    
   } catch (err) {
     error.value = err.message || 'Đã xảy ra lỗi khi tải dữ liệu'
   } finally {

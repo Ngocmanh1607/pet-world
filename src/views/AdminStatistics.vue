@@ -68,7 +68,9 @@ onMounted(async () => {
   try {
     loading.value = true
     // Gọi API tổng hợp
-    const res = await axios.get('/orders/statistics/all')
+    const res = await axios.get('http://localhost:8000/api/v1/orders/statistics/all', {
+      withCredentials: true // Include cookies if needed for authentication
+    })
     const stats = res.data
     // Gán số liệu vào biến reactive, có fallback cho các kiểu tên trường khác nhau
     totalOrders.value = stats.total_orders || stats.totalOrders || 0

@@ -643,9 +643,23 @@
 }
 </style>
 <script>
-import { productService } from '@/services/api'; // Enable real API
+import { productService } from '@/services/api';
+import { useCart } from '@/store/cart';
+import axios from 'axios';
+import { useRouter } from 'vue-router';
 
 export default {
+  setup() {
+    // Use cart in setup to make it available throughout the component
+    const cart = useCart();
+    const router = useRouter();
+    
+    return {
+      cart,
+      router
+    };
+  },
+  
   data() {
     return {
       quantity: 1,
@@ -682,7 +696,8 @@ export default {
           price: 400000,
           image: require('@/assets/product4.png')
         }
-      ]
+      ],
+      cartLoading: false
     }
   },
 
@@ -717,27 +732,69 @@ export default {
 
     decrease() {
       if (this.quantity > 1) {
-        this.quantity--
+        this.quantity--;
       }
     },
 
     increase() {
-      this.quantity++
+      if (this.quantity < (this.product.stock || 99)) {
+        this.quantity++;
+      }
     },
 
-    toggleLike() {
+    async toggleLike() {
       this.isLiked = !this.isLiked;
-      // TODO: Call API to update favorite status
+      // Implement favorite API call
+      try {
+        const action = this.isLiked ? 'add' : 'remove';
+        await axios.post(`http://localhost:8000/api/v1/favorites/${action}/${this.product.id}`, {}, {
+          withCredentials: true
+        });
+      } catch (error) {
+        console.error('Error updating favorite status:', error);
+        // Revert UI state on error
+        this.isLiked = !this.isLiked;
+        alert('Không thể cập nhật trạng thái yêu thích. Vui lòng thử lại sau.');
+      }
     },
 
-    addToCart() {
-      // TODO: Implement add to cart functionality
-      console.log(`Added ${this.quantity} ${this.product?.name} to cart`);
+    async addToCart() {
+      if (!this.product) return;
+      
+      try {
+        this.cartLoading = true;
+        
+        // Format product data for cart
+        const productForCart = {
+          id: this.product.id || this.product.product_id,
+          name: this.product.name || this.product.product_name,
+          price: this.product.base_price || this.product.price,
+          image: this.product.image,
+          category: this.product.category
+        };
+        
+        // Use the addItem method from the cart store
+        await this.cart.addItem(productForCart);
+        
+        // Success message
+        alert(`Đã thêm ${this.quantity} ${productForCart.name} vào giỏ hàng!`);
+        
+      } catch (error) {
+        console.error('Error adding to cart:', error);
+        alert('Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại sau.');
+      } finally {
+        this.cartLoading = false;
+      }
     },
 
-    buyNow() {
-      // TODO: Implement buy now functionality
-      console.log(`Buy now ${this.quantity} ${this.product?.name}`);
+    async buyNow() {
+      // First add to cart, then go to checkout page
+      try {
+        await this.addToCart();
+        this.$router.push('/cart');
+      } catch (error) {
+        console.error('Error with buy now:', error);
+      }
     },
 
     formatPrice(price) {

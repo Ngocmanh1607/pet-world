@@ -56,7 +56,7 @@ export default {
         return;
       }
 
-      const url = 'https://9ad9-116-110-40-129.ngrok-free.app/login';
+      const url = 'http://localhost:8000/login';
 
       try {
         const response = await fetch(url, {

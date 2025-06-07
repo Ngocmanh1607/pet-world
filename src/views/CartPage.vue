@@ -92,91 +92,76 @@
       </router-link>
     </div>
 
-    <!-- Hiển thị danh sách sản phẩm trong giỏ hàng -->
-    <div v-else class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8">
-      <!-- Danh sách sản phẩm -->
-      <div class="bg-white rounded-xl overflow-hidden">
-        <div
-          v-for="item in cartItems"
-          :key="item.id"
-          class="grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr_1fr_auto] items-center p-4 border-b border-gray-200 transition-all duration-300"
-        >
-          <div class="flex items-center gap-4">
-            <img
-              :src="item.image"
-              :alt="item.name"
-              class="w-20 h-20 object-cover rounded-lg"
-            />
-            <div class="flex-1">
-              <h3 class="font-semibold mb-1 text-lg">{{ item.name }}</h3>
-              <p class="text-gray-600 text-sm">{{ item.category }}</p>
-            </div>
+<div v-else class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8">
+    <!-- Danh sách sản phẩm -->
+    <div class="bg-white rounded-xl overflow-hidden">
+      <div
+        v-for="item in cartItems"
+        :key="item.cart_item_id"
+        class="grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr_1fr_auto] items-center p-4 border-b border-gray-200 transition-all duration-300"
+      >
+        <div class="flex items-center gap-4">
+          <img
+            :src="item.product.product_image || 'https://via.placeholder.com/100'"
+            :alt="item.product_name"
+            class="w-20 h-20 object-cover rounded-lg"
+          />
+          <div class="flex-1">
+            <h3 class="font-semibold mb-1 text-lg">{{ item.name || 'Sản phẩm không xác định' }}</h3>
+            <p class="text-gray-600 text-sm">{{ item.category || 'Không có danh mục' }}</p>
           </div>
-          <div class="text-gray-800">{{ item.price.toLocaleString() }}đ</div>
-          <div class="flex items-center gap-2">
-            <!-- Nút giảm số lượng -->
-            <button 
-              @click="decrease(item)" 
-              class="w-8 h-8 border border-gray-300 rounded bg-white hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              :disabled="item.quantity <= 1"
-            >
-              -
-            </button>
-            <span class="min-w-10 text-center">{{ item.quantity }}</span>
-            <!-- Nút tăng số lượng -->
-            <button 
-              @click="increase(item)" 
-              class="w-8 h-8 border border-gray-300 rounded bg-white hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-colors"
-            >
-              +
-            </button>
-          </div>
-          <div class="text-gray-800">{{ (item.price * item.quantity).toLocaleString() }}đ</div>
-          <!-- Nút xóa sản phẩm -->
+        </div>
+        <div class="text-gray-800">{{ formatPrice(item.price) }}đ</div>
+        <div class="flex items-center gap-2">
+          <!-- Nút giảm số lượng -->
           <button 
-            @click="remove(item)" 
-            class="text-red-500 hover:text-red-700 p-2 transition-transform hover:scale-110"
-            title="Xóa sản phẩm"
+            @click="decrease(item)" 
+            class="w-8 h-8 border border-gray-300 rounded bg-white hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            :disabled="item.quantity <= 1"
           >
-            <i class="fas fa-trash-alt"></i>
+            -
+          </button>
+          <span class="min-w-10 text-center">{{ item.quantity || 1 }}</span>
+          <!-- Nút tăng số lượng -->
+          <button 
+            @click="increase(item)" 
+            class="w-8 h-8 border border-gray-300 rounded bg-white hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-colors"
+          >
+            +
           </button>
         </div>
-      </div>
-
-      <!-- Bảng tổng kết đơn hàng -->
-      <div class="bg-orange-50 rounded-xl p-6 h-fit">
-        <h2 class="text-xl font-bold mb-4">Tổng đơn hàng</h2>
-        <div class="flex justify-between text-gray-600 mb-3">
-          <span>Tạm tính:</span>
-          <span class="font-semibold">{{ subtotal.toLocaleString() }}đ</span>
-        </div>
-        <div class="flex justify-between text-gray-600 mb-3">
-          <span>Vận chuyển:</span>
-          <span class="font-semibold">{{ shipping.toLocaleString() }}đ</span>
-        </div>
-        <div class="flex justify-between mt-4 pt-4 border-t border-gray-300">
-          <span>Tổng cộng:</span>
-          <span class="font-bold text-xl text-orange-500"
-            >{{ total.toLocaleString() }}đ</span
-          >
-        </div>
-        <!-- Nút chuyển sang trang thanh toán -->
+        <div class="text-gray-800">{{ formatPrice(getItemTotal(item)) }}đ</div>
+        <!-- Nút xóa sản phẩm -->
         <button 
-          @click="goCheckout" 
-          class="w-full bg-orange-500 text-white rounded-lg py-3 text-lg mt-4 flex items-center justify-center hover:bg-orange-600 transition-all hover:-translate-y-0.5"
+          @click="remove(item)" 
+          class="text-red-500 hover:text-red-700 p-2 transition-transform hover:scale-110"
+          title="Xóa sản phẩm"
         >
-          Tiến hành thanh toán
-          <i class="fas fa-arrow-right ml-2"></i>
+          <i class="fas fa-trash-alt"></i>
         </button>
-        <router-link
-          to="/products"
-          class="block text-center mt-3 text-gray-600 hover:text-orange-500 transition-colors"
-        >
-          <i class="fas fa-arrow-left mr-2"></i>
-          Tiếp tục mua sắm
-        </router-link>
       </div>
     </div>
+    
+    <!-- Bảng tổng kết đơn hàng -->
+    <div class="bg-orange-50 rounded-xl p-6 h-fit">
+      <h2 class="text-xl font-bold mb-4">Tổng đơn hàng</h2>
+      <div class="flex justify-between text-gray-600 mb-3">
+        <span>Tạm tính:</span>
+        <span class="font-semibold">{{ formatPrice(subtotal) }}đ</span>
+      </div>
+      <div class="flex justify-between text-gray-600 mb-3">
+        <span>Vận chuyển:</span>
+        <span class="font-semibold">{{ formatPrice(shipping) }}đ</span>
+      </div>
+      <div class="flex justify-between mt-4 pt-4 border-t border-gray-300">
+        <span>Tổng cộng:</span>
+        <span class="font-bold text-xl text-orange-500"
+          >{{ formatPrice(total) }}đ</span
+        >
+      </div>
+      <!-- ... rest of the component ... -->
+    </div>
+  </div>
   </div>
 </template>
 
@@ -185,82 +170,110 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import AddressSelector from '@/components/AddressSelector.vue'
+import { useCart } from '@/store/cart'
 import axios from 'axios'
 
 const router = useRouter()
+// Sử dụng store giỏ hàng đã được cập nhật với xác thực token
+const { cartItems, fetchCart, updateQuantity, removeItem } = useCart()
 
-// Kiểm tra đăng nhập: nếu chưa đăng nhập thì chuyển hướng sang trang đăng nhập
-// Nếu không có user_id trong localStorage thì không cho truy cập giỏ hàng
-const customerId = localStorage.getItem('user_id')
-const isLoggedIn = !!customerId
-if (!isLoggedIn) {
-  alert('Bạn cần đăng nhập để sử dụng giỏ hàng!')
-  router.replace('/login')
-} else {
-  // Chỉ khi đã đăng nhập mới gọi API lấy giỏ hàng và địa chỉ
-  onMounted(async () => {
-    // Lấy danh sách sản phẩm trong giỏ hàng từ API
-    const res = await axios.get(`/cart/${customerId}`)
-    cartItems.value = res.data.items
+// State
+const showAddressSelector = ref(false)
+const shippingAddress = ref({})
+const shipping = ref(30000)
+// Theo dõi trạng thái loading khi thực hiện API calls
+const isLoading = ref(false)
 
-    // Lấy địa chỉ giao hàng mặc định hoặc đầu tiên
-    const addressRes = await axios.get(`/address?customer_id=${customerId}`)
-    shippingAddress.value = addressRes.data.find(addr => addr.is_default) || addressRes.data[0]
-  })
+// Format price helper function
+const formatPrice = (price) => {
+  // Make sure price is a number and not undefined
+  const safePrice = Number(price) || 0;
+  return safePrice.toLocaleString('vi-VN');
 }
 
-// Danh sách sản phẩm trong giỏ hàng
-const cartItems = ref([])
+// Get total for a specific item
+const getItemTotal = (item) => {
+  const price = Number(item.base_price) || 0;
+  const quantity = Number(item.quantity) || 1;
+  return price * quantity;
+}
+
+// Tải giỏ hàng và địa chỉ khi component được tạo
+onMounted(async () => {
+  try {
+    isLoading.value = true
+    // Tải giỏ hàng và địa chỉ song song
+    await Promise.all([
+      fetchCart(),
+      fetchAddresses()
+    ])
+  } catch (err) {
+    console.error('Error initializing cart page:', err)
+    // Chỉ chuyển hướng đến trang đăng nhập nếu lỗi là unauthorized
+    if (err.response && (err.response.status === 401 || err.response.status === 403)) {
+      alert('Vui lòng đăng nhập để xem giỏ hàng')
+      router.push('/login')
+    }
+  } finally {
+    isLoading.value = false
+  }
+})
+
+// Lấy địa chỉ giao hàng
+const fetchAddresses = async () => {
+  try {
+    // Lấy địa chỉ từ API sử dụng cookie session
+    const addressRes = await axios.get('http://localhost:8000/api/v1/address', {
+      withCredentials: true
+    })
+    
+    if (addressRes.data && Array.isArray(addressRes.data)) {
+      // Tìm địa chỉ mặc định hoặc lấy địa chỉ đầu tiên
+      shippingAddress.value = addressRes.data.find(addr => addr.is_default) || 
+                              (addressRes.data.length > 0 ? addressRes.data[0] : {})
+    }
+  } catch (err) {
+    console.error('Error fetching addresses:', err)
+  }
+}
 
 // Tính tổng tiền hàng (chưa tính phí vận chuyển)
 const subtotal = computed(() => {
+  console.log(cartItems);
+  
   return cartItems.value.reduce(
-    (total, item) => total + item.price * item.quantity,
+    (total, item) => total + getItemTotal(item),
     0
-  );
-});
-
-// Phí vận chuyển cố định
-const shipping = ref(30000);
+  )
+})
 
 // Tính tổng tiền phải trả (bao gồm phí vận chuyển)
-const total = computed(() => subtotal.value + shipping.value);
+const total = computed(() => subtotal.value + shipping.value)
 
 // Hàm tăng số lượng sản phẩm trong giỏ hàng
 async function increase(item) {
-  await axios.put(`/api/cart/items/${item.id}`, { quantity: item.quantity + 1 })
-  item.quantity++
+  await updateQuantity(item.id, item.quantity + 1)
 }
 
 // Hàm giảm số lượng sản phẩm (chỉ giảm khi số lượng > 1)
 async function decrease(item) {
   if (item.quantity > 1) {
-    await axios.put(`/api/cart/items/${item.id}`, { quantity: item.quantity - 1 })
-    item.quantity--
+    await updateQuantity(item.id, item.quantity - 1)
   }
 }
 
 // Hàm xóa sản phẩm khỏi giỏ hàng
 async function remove(item) {
-  await axios.delete(`/cart/${item.cart_item_id}/${item.id}`)
-  cartItems.value = cartItems.value.filter(i => i.id !== item.id)
+  await removeItem(item.id)
 }
 
-// Hàm chuyển hướng đến trang thanh toán
-function goCheckout() {
-  router.push('/checkout');
-}
 
-// Hiển thị/ẩn modal chọn địa chỉ giao hàng
-const showAddressSelector = ref(false)
-// Địa chỉ giao hàng hiện tại
-const shippingAddress = ref({})
 
 // Khi chọn địa chỉ mới từ AddressSelector
 function onAddressSelected(address) {
-  shippingAddress.value = address;
-  localStorage.setItem('shipping_address', JSON.stringify(address));
-  showAddressSelector.value = false;
+  shippingAddress.value = address
+  localStorage.setItem('shipping_address', JSON.stringify(address))
+  showAddressSelector.value = false
 }
 </script>
 

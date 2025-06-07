@@ -303,14 +303,20 @@ export default {
   },
   computed: {
     filteredAndSortedProducts() {
-      let filtered = this.products.filter((item) =>
-        item.code.toLowerCase().includes(this.searchTerm.toLowerCase())
-      );
+      // First add a safety check to ensure products is an array
+      if (!Array.isArray(this.products)) return [];
+      
+      // Then add a safety check for the code property
+      let filtered = this.products.filter((item) => {
+        if (!item || typeof item !== 'object') return false;
+        return item.code && item.code.toLowerCase().includes((this.searchTerm || '').toLowerCase());
+      });
+      
       return filtered.slice().sort((a, b) => {
         let modifier = this.currentSortDir === 'asc' ? 1 : -1;
         let aVal = a[this.currentSort];
         let bVal = b[this.currentSort];
-
+  
         if (!isNaN(parseFloat(aVal)) && !isNaN(parseFloat(bVal))) {
           aVal = parseFloat(aVal);
           bVal = parseFloat(bVal);
@@ -318,14 +324,14 @@ export default {
           if (aVal > bVal) return 1 * modifier;
           return 0;
         }
-
+  
         aVal = (aVal || '').toString().toLowerCase();
         bVal = (bVal || '').toString().toLowerCase();
         if (aVal < bVal) return -1 * modifier;
         if (aVal > bVal) return 1 * modifier;
         return 0;
       });
-    },
+    }
   },
   methods: {
     getCookie(name) {
@@ -337,12 +343,35 @@ export default {
     async fetchProducts() {
       this.loading = true;
       try {
-        const res = await fetch('https://9ad9-116-110-40-129.ngrok-free.app/api/v1/promotions');
+        const res = await fetch('http://localhost:8000/api/v1/promotions', {
+          credentials: 'include'  // Add this to include cookies in the request
+        });
+        
         if (!res.ok) throw new Error('Failed to fetch products');
-        this.products = await res.json();
+        
+        const data = await res.json();
+        
+        // Check if the response is an array or has a data property
+        if (Array.isArray(data)) {
+          this.products = data;
+        } else if (data.promotions && Array.isArray(data.promotions)) {
+          this.products = data.promotions;
+        } else if (data.data && Array.isArray(data.data)) {
+          this.products = data.data;
+        } else {
+          console.error('Unexpected API response format:', data);
+          this.products = [];
+          throw new Error('Invalid data format received from API');
+        }
+        
+        // Log the first item to help debug structure
+        if (this.products.length > 0) {
+          console.log('Sample promotion item:', this.products[0]);
+        }
       } catch (err) {
         this.error = err.message;
         console.error(err);
+        this.products = []; // Ensure products is at least an empty array on error
       } finally {
         this.loading = false;
       }
@@ -376,9 +405,10 @@ export default {
         this.loading = true;
         const token = this.getCookie('token');
         const res = await fetch(
-          `https://9ad9-116-110-40-129.ngrok-free.app/api/v1/promotions/${this.editingProduct.promotion_id}`,
+          `http://localhost:8000/api/v1/promotions/${this.editingProduct.promotion_id}`,
           {
             method: 'PUT',
+            credentials: 'include',
             headers: {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${token}`,
@@ -433,46 +463,36 @@ export default {
     async createProduct() {
       try {
         this.loading = true;
-        const token = this.getCookie('token');
-        const res = await fetch('https://9ad9-116-110-40-129.ngrok-free.app/api/v1/promotions', {
+        const res = await fetch('http://localhost:8000/api/v1/promotions', {
           method: 'POST',
+          credentials: 'include', // Add this line to include cookies in the request
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(this.creatingProduct),
         });
+        
         const contentType = res.headers.get('content-type') || '';
-
+    
         if (!res.ok) {
           const errorText = await res.text();
           throw new Error(`Lỗi khi tạo sản phẩm: ${errorText}`);
         }
-
+    
         if (!contentType.includes('application/json')) {
           const text = await res.text();
           throw new Error(`Phản hồi không phải JSON: ${text}`);
         }
-
+    
         const data = await res.json();
-
-        const newProduct = data.success;
-
+    
+        // Handle the response correctly based on your API structure
+        const newProduct = data.success ? data.promotion : data;
+    
         this.products.push(newProduct);
-
+    
         // Reset form tạo mới
-        this.creatingProduct = {
-          promotion_id: '',
-          code: '',
-          description: '',
-          discount_percent: '',
-          total_voucher: '',
-          used_voucher: '',
-          start_date: '',
-          end_date: '',
-          is_active: 0,
-        };
-
+        this.creatingProduct = null;
         this.closeCreatePopup();
         this.fetchProducts();
       } catch (error) {
@@ -481,7 +501,7 @@ export default {
       } finally {
         this.loading = false;
       }
-    },
+    }
   },
 };
 </script>

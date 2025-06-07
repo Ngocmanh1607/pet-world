@@ -9,7 +9,7 @@
       <div class="bg-white p-4 rounded-lg shadow mb-4">
         <!-- Ô tìm kiếm -->
         <div class="mb-4">
-          <SearchBar v-model="searchQuery" :placeholder="`Tìm kiếm theo mã đơn hàng, ngày đặt, tên hoặc email...`"
+          <SearchBar v-model="searchQuery" placeholder="Tìm kiếm theo mã đơn hàng, tên khách hàng..."
             @input="applyFilters" />
         </div>
         <!-- Bộ lọc trạng thái -->
@@ -17,25 +17,46 @@
           <!-- Lọc theo trạng thái đơn hàng -->
           <select v-model="statusFilter" @change="applyFilters" class="flex-1 p-2 border border-gray-300 rounded">
             <option value="">Tất cả trạng thái đơn hàng</option>
-            <option value="pending">Chờ xác nhận</option>
-            <option value="processing">Đang xử lý</option>
-            <option value="shipped">Đang giao hàng</option>
-            <option value="delivered">Đã nhận hàng</option>
-            <option value="cancelled">Đã hủy</option>
+            <option value="0">Đã hủy</option>
+            <option value="1">Đang xử lý</option>
+            <option value="2">Đang giao hàng</option>
+            <option value="3">Đã hoàn thành</option>
           </select>
           <!-- Lọc theo trạng thái thanh toán -->
-          <select v-model="paymentStatusFilter" @change="applyFilters"
+          <select v-model="paymentStatusFilter" @change="fetchOrders"
             class="flex-1 p-2 border border-gray-300 rounded">
             <option value="">Tất cả trạng thái thanh toán</option>
-            <option value="pending">Chờ thanh toán</option>
-            <option value="paid">Đã thanh toán</option>
-            <option value="failed">Thanh toán thất bại</option>
+            <option value="0">Chưa thanh toán</option>
+            <option value="1">Đã thanh toán</option>
           </select>
+          <!-- Nút tìm kiếm -->
+          <button @click="fetchOrders" 
+            class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition-colors">
+            Tìm kiếm
+          </button>
         </div>
       </div>
 
+      <!-- Loading indicator -->
+      <div v-if="loading" class="text-center py-10">
+        <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-orange-500 border-t-transparent"></div>
+        <p class="mt-2 text-gray-600">Đang tải dữ liệu...</p>
+      </div>
+
+      <!-- Error message -->
+      <div v-else-if="error" class="bg-red-50 p-4 rounded-lg text-center text-red-600">
+        {{ error }}
+        <button @click="fetchOrders" class="ml-2 underline">Thử lại</button>
+      </div>
+
+      <!-- Empty state -->
+      <div v-else-if="filteredOrders.length === 0" class="bg-white rounded-lg shadow p-10 text-center">
+        <i class="fas fa-inbox text-4xl text-gray-300 mb-3"></i>
+        <p class="text-gray-500">Không tìm thấy đơn hàng nào phù hợp với bộ lọc</p>
+      </div>
+
       <!-- Bảng danh sách đơn hàng -->
-      <div class="bg-white rounded-lg shadow overflow-x-auto">
+      <div v-else class="bg-white rounded-lg shadow overflow-x-auto">
         <table class="w-full border-collapse">
           <!-- Header của bảng -->
           <thead>
@@ -44,6 +65,9 @@
                 ID đơn hàng
               </th>
               <th class="bg-gray-100 font-semibold p-4 text-left">Ngày đặt</th>
+              <th class="bg-gray-100 font-semibold p-4 text-left">
+                Khách hàng
+              </th>
               <th class="bg-gray-100 font-semibold p-4 text-left">
                 Trạng thái đơn hàng
               </th>
@@ -61,48 +85,38 @@
           </thead>
           <!-- Body của bảng -->
           <tbody>
-            <tr v-for="order in paginatedOrders" :key="order.id" class="even:bg-gray-50">
-              <td class="p-4">{{ order.id }}</td>
-              <td class="p-4">{{ formatDate(order.created_at) }}</td>
+            <tr v-for="order in paginatedOrders" :key="order.order_id" class="even:bg-gray-50">
+              <td class="p-4">{{ order.order_id }}</td>
+              <td class="p-4">{{ formatDate(order.order_date) }}</td>
+              <td class="p-4">{{ order.customer_name || 'Không có thông tin' }}</td>
               <!-- Hiển thị trạng thái đơn hàng với màu sắc tương ứng -->
               <td class="p-4">
                 <span :class="[
                   'px-2 py-1 rounded text-xs font-semibold',
-                  order.status === 'pending' &&
-                  'bg-yellow-100 text-yellow-800',
-                  order.status === 'processing' &&
-                  'bg-blue-100 text-blue-800',
-                  order.status === 'shipped' && 'bg-green-100 text-green-800',
-                  order.status === 'delivered' &&
-                  'bg-emerald-100 text-emerald-800',
-                  order.status === 'cancelled' && 'bg-red-100 text-red-800',
+                  order.status === '0' && 'bg-red-100 text-red-800',
+                  order.status === '1' && 'bg-yellow-100 text-yellow-800',
+                  order.status === '2' && 'bg-blue-100 text-blue-800',
+                  order.status === '3' && 'bg-green-100 text-green-800',
                 ]">
                   {{ getStatusText(order.status) }}
                 </span>
               </td>
               <td class="p-4">{{ formatPrice(order.total_amount) }}</td>
-              <td class="p-4">{{ getPaymentMethodText(order.payment_method) }}</td>
+              <td class="p-4">{{ order.payment_method }}</td>
               <!-- Hiển thị trạng thái thanh toán với màu sắc tương ứng -->
-              <td class="p-4">
-                {{ getPaymentMethodText(order.payment_method) }}
-              </td>
               <td class="p-4">
                 <span :class="[
                   'px-2 py-1 rounded text-xs font-semibold',
-                  order.payment_status === 'pending' &&
-                  'bg-yellow-100 text-yellow-800',
-                  order.payment_status === 'paid' &&
-                  'bg-green-100 text-green-800',
-                  order.payment_status === 'failed' &&
-                  'bg-red-100 text-red-800',
+                  order.payment_status === '0' && 'bg-yellow-100 text-yellow-800',
+                  order.payment_status === '1' && 'bg-green-100 text-green-800',
                 ]">
                   {{ getPaymentStatusText(order.payment_status) }}
                 </span>
               </td>
-              <!-- Nút chỉnh sửa đơn hàng -->
-              <td class="p-4 flex gap-2">
-                <button @click="editOrder(order.id)" class="p-1 text-blue-600 hover:opacity-70" title="Sửa đơn hàng">
-                  <i class="fas fa-edit"></i>
+              <!-- Nút xem chi tiết đơn hàng -->
+              <td class="p-4">
+                <button @click="viewOrderDetail(order)" class="p-1 text-gray-600 hover:opacity-70" title="Xem chi tiết">
+                  <i class="fas fa-eye"></i>
                 </button>
               </td>
             </tr>
@@ -111,85 +125,154 @@
       </div>
 
       <!-- Phân trang -->
-      <div class="flex justify-center items-center gap-4 mt-4">
+      <div v-if="filteredOrders.length > 0" class="flex justify-center items-center gap-4 mt-4">
         <BasePagination :current-page="currentPage" :total-pages="totalPages"
           @prev="currentPage > 1 && (currentPage--, applyFilters())"
           @next="currentPage < totalPages && (currentPage++, applyFilters())" />
       </div>
     </div>
 
-    <!-- Modal chỉnh sửa đơn hàng -->
-    <div v-if="showEditModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div class="bg-white rounded-lg w-full max-w-xl max-h-[90vh] overflow-y-auto">
+    <!-- Order Detail Modal -->
+    <div v-if="selectedOrder && showDetailModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      <div class="bg-white rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto">
         <!-- Header của modal -->
         <div class="flex justify-between items-center border-b p-4">
           <h2 class="text-lg font-bold">
-            Xác nhận đơn hàng #{{ editingOrder.id }}
+            Chi tiết đơn hàng #{{ selectedOrder.order_id }}
           </h2>
-          <button class="text-2xl text-gray-500 hover:text-gray-700" @click="showEditModal = false">
+          <button class="text-2xl text-gray-500 hover:text-gray-700" @click="closeDetailModal">
             &times;
           </button>
         </div>
+
         <!-- Body của modal -->
         <div class="p-4">
           <!-- Thông tin cơ bản của đơn hàng -->
           <div class="mb-6">
-            <div class="flex mb-3">
-              <label class="w-40 font-semibold text-gray-600">Khách hàng:</label><span>{{ editingOrder.customer_name
-                }}</span>
-            </div>
-            <div class="flex mb-3">
-              <label class="w-40 font-semibold text-gray-600">Email:</label><span>{{ editingOrder.customer_email
-                }}</span>
-            </div>
-            <div class="flex mb-3">
-              <label class="w-40 font-semibold text-gray-600">Ngày đặt:</label><span>{{
-                formatDate(editingOrder.created_at) }}</span>
-            </div>
-            <div class="flex mb-3">
-              <label class="w-40 font-semibold text-gray-600">Tổng giá trị:</label><span>{{
-                formatPrice(editingOrder.total_amount) }}</span>
-            </div>
-            <div class="flex mb-3">
-              <label class="w-40 font-semibold text-gray-600">Phương thức thanh toán:</label><span>{{
-                getPaymentMethodText(editingOrder.payment_method)
-                }}</span>
+            <h3 class="text-gray-700 font-semibold mb-3">Thông tin đơn hàng</h3>
+            <div class="bg-gray-50 p-4 rounded grid grid-cols-2 gap-x-4 gap-y-2">
+              <div class="flex items-center">
+                <span class="font-medium text-gray-600 mr-2">Mã đơn hàng:</span>
+                <span>{{ selectedOrder.order_id }}</span>
+              </div>
+              <div class="flex items-center">
+                <span class="font-medium text-gray-600 mr-2">Ngày đặt:</span>
+                <span>{{ formatDate(selectedOrder.order_date) }}</span>
+              </div>
+              <div class="flex items-center">
+                <span class="font-medium text-gray-600 mr-2">Trạng thái:</span>
+                <span :class="[
+                  'px-2 py-1 rounded text-xs font-semibold',
+                  selectedOrder.status === '0' && 'bg-red-100 text-red-800',
+                  selectedOrder.status === '1' && 'bg-yellow-100 text-yellow-800',
+                  selectedOrder.status === '2' && 'bg-blue-100 text-blue-800',
+                  selectedOrder.status === '3' && 'bg-green-100 text-green-800',
+                ]">
+                  {{ getStatusText(selectedOrder.status) }}
+                </span>
+              </div>
+              <div class="flex items-center">
+                <span class="font-medium text-gray-600 mr-2">Thanh toán:</span>
+                <span :class="[
+                  'px-2 py-1 rounded text-xs font-semibold',
+                  selectedOrder.payment_status === '0' && 'bg-yellow-100 text-yellow-800',
+                  selectedOrder.payment_status === '1' && 'bg-green-100 text-green-800',
+                ]">
+                  {{ getPaymentStatusText(selectedOrder.payment_status) }}
+                </span>
+              </div>
+              <div class="flex items-center">
+                <span class="font-medium text-gray-600 mr-2">Phương thức thanh toán:</span>
+                <span>{{ selectedOrder.payment_method || 'Không có thông tin' }}</span>
+              </div>
+              <div class="flex items-center">
+                <span class="font-medium text-gray-600 mr-2">Tổng giá trị:</span>
+                <span class="font-bold text-orange-500">{{ formatPrice(selectedOrder.total_amount) }}</span>
+              </div>
             </div>
           </div>
-          <!-- Form chỉnh sửa trạng thái -->
-          <div class="bg-gray-50 p-4 rounded mb-4">
-            <!-- Dropdown trạng thái đơn hàng -->
-            <div class="mb-4">
-              <label class="block font-semibold text-gray-600 mb-2">Trạng thái đơn hàng:</label>
-              <select v-model="editingOrder.status" class="w-full p-2 border border-gray-300 rounded">
-                <!-- Luôn hiển thị tất cả các trạng thái, nhưng chỉ cho phép chọn từ pending sang processing -->
-                <option value="pending">Chờ xác nhận</option>
-                <option value="processing" :disabled="editingOrder.status !== 'pending'">Đang xử lý</option>
-                <option value="shipped" :disabled="editingOrder.status === 'pending'">Đang giao hàng</option>
-                <option value="delivered" :disabled="editingOrder.status === 'pending'">Đã nhận hàng</option>
-                <option value="cancelled" :disabled="editingOrder.status === 'pending'">Đã hủy</option>
-              </select>
+
+          <!-- Thông tin khách hàng -->
+          <div class="mb-6">
+            <h3 class="text-gray-700 font-semibold mb-3">Thông tin khách hàng</h3>
+            <div class="bg-gray-50 p-4 rounded">
+              <div class="mb-2">
+                <span class="font-medium text-gray-600 mr-2">Tên khách hàng:</span>
+                <span>{{ selectedOrder.customer_name || 'Không có thông tin' }}</span>
+              </div>
+              <div class="mb-2">
+                <span class="font-medium text-gray-600 mr-2">Số điện thoại:</span>
+                <span>{{ selectedOrder.phone || 'Không có thông tin' }}</span>
+              </div>
+              <div class="mb-2">
+                <span class="font-medium text-gray-600 mr-2">Địa chỉ:</span>
+                <span>{{ selectedOrder.address_line || 'Không có thông tin' }}</span>
+              </div>
             </div>
-            <!-- Dropdown trạng thái thanh toán -->
-            <div>
-              <label class="block font-semibold text-gray-600 mb-2">Trạng thái thanh toán:</label>
-              <select v-model="editingOrder.payment_status" class="w-full p-2 border border-gray-300 rounded">
-                <option value="pending">Chờ thanh toán</option>
-                <option value="paid">Đã thanh toán</option>
-                <option value="failed">Thanh toán thất bại</option>
-              </select>
+          </div>
+
+          <!-- Danh sách sản phẩm -->
+          <div class="mb-6">
+            <h3 class="text-gray-700 font-semibold mb-3">Sản phẩm trong đơn</h3>
+            
+            <!-- Loading state for product details -->
+            <div v-if="loading" class="py-4 text-center text-gray-500">
+              <div class="inline-block animate-spin rounded-full h-5 w-5 border-2 border-orange-500 border-t-transparent mr-2"></div>
+              Đang tải chi tiết sản phẩm...
+            </div>
+            
+            <!-- Show product details from API -->
+            <div v-else-if="selectedOrder.productDetails && selectedOrder.productDetails.length > 0" 
+                 class="bg-white border rounded divide-y">
+              <div v-for="(item, index) in selectedOrder.productDetails" :key="index" class="p-3 flex items-center">
+                <div class="w-16 h-16 mr-3 flex-shrink-0">
+                  <img :src="item.image" :alt="item.name" class="w-full h-full object-cover rounded" />
+                </div>
+                <div class="flex-1">
+                  <div class="font-medium">{{ item.name }}</div>
+                  <div class="text-sm text-gray-500">{{ item.category }}</div>
+                  <div class="text-sm">Số lượng: {{ item.count }}</div>
+                </div>
+                <div class="text-right">
+                  <div class="font-medium">{{ formatPrice(item.price) }}</div>
+                  <div class="text-sm text-gray-500">x {{ item.count }}</div>
+                  <div class="font-semibold text-orange-500">{{ formatPrice(item.price * item.count) }}</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Fallback to show items from list view -->
+            <div v-else-if="selectedOrder.items && selectedOrder.items.length > 0" 
+                 class="bg-white border rounded divide-y">
+              <div v-for="(item, index) in selectedOrder.items" :key="index" class="p-3 flex items-center">
+                <div class="w-16 h-16 mr-3 flex-shrink-0">
+                  <img :src="item.image" :alt="item.name" class="w-full h-full object-cover rounded" />
+                </div>
+                <div class="flex-1">
+                  <div class="font-medium">{{ item.name }}</div>
+                  <div class="text-sm text-gray-500">{{ item.category }}</div>
+                  <div class="text-sm">Số lượng: {{ item.count }}</div>
+                </div>
+                <div class="text-right">
+                  <div class="font-medium">{{ formatPrice(item.price) }}</div>
+                  <div class="text-sm text-gray-500">x {{ item.count }}</div>
+                  <div class="font-semibold text-orange-500">{{ formatPrice(item.price * item.count) }}</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- No products state -->
+            <div v-else class="bg-gray-50 p-4 text-center text-gray-500 rounded">
+              Không có sản phẩm nào trong đơn hàng này
             </div>
           </div>
         </div>
+
         <!-- Footer của modal -->
         <div class="flex justify-end gap-4 border-t p-4">
-          <button class="px-4 py-2 rounded border font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200"
-            @click="showEditModal = false">
-            Hủy
-          </button>
-          <button class="px-4 py-2 rounded font-semibold text-white bg-blue-500 hover:bg-blue-700"
-            @click="saveOrderChanges">
-            Lưu thay đổi
+          <button class="px-4 py-2 rounded border border-gray-300 font-semibold text-gray-700 hover:bg-gray-100"
+            @click="closeDetailModal">
+            Đóng
           </button>
         </div>
       </div>
@@ -198,124 +281,32 @@
 </template>
 
 <script setup>
-// Import các thư viện và component cần thiết
 import { ref, computed, onMounted } from 'vue'
-import axios from 'axios'
 import BasePagination from '@/components/BasePagination.vue'
 import SearchBar from '@/components/AdminSearchBar.vue'
 
-// Cấu hình axios instance
-const axiosInstance = axios.create({
-  baseURL: process.env.VUE_APP_API_URL || 'https://9ad9-116-110-40-129.ngrok-free.app/api/v1',
-  timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-  }
-})
-
-// Thêm interceptor để xử lý request
-axiosInstance.interceptors.request.use(
-  config => {
-    const token = localStorage.getItem('admin_token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
-    return config
-  },
-  error => {
-    return Promise.reject(error)
-  }
-)
-
-// Thêm interceptor để xử lý response
-axiosInstance.interceptors.response.use(
-  response => response,
-  error => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('admin_token')
-      window.location.href = '/admin/login'
-      return Promise.reject(error)
-    }
-    return Promise.reject(error)
-  }
-)
-
-// Helper function để xử lý lỗi
-const handleError = (error, defaultMessage = 'Có lỗi xảy ra') => {
-  console.error(error)
-  if (error.response?.data?.message) {
-    throw new Error(error.response.data.message)
-  }
-  throw new Error(defaultMessage)
-}
-
-// Order Service
-const orderService = {
-  getAll: async (params) => {
-    try {
-      const response = await axiosInstance.get('/orders', { params })
-      return response.data
-    } catch (error) {
-      handleError(error, 'Không thể tải danh sách đơn hàng')
-    }
-  },
-
-  getById: async (id) => {
-    try {
-      const response = await axiosInstance.get(`/orders/${id}`)
-      return response.data
-    } catch (error) {
-      handleError(error, 'Không thể tải thông tin đơn hàng')
-    }
-  },
-
-  update: async (id, data) => {
-    try {
-      const response = await axiosInstance.put(`/orders/${id}`, data)
-      return response.data
-    } catch (error) {
-      handleError(error, 'Không thể cập nhật đơn hàng')
-    }
-  }
-}
 
 // =====================
 // Biến trạng thái reactive
 // =====================
-// Danh sách đơn hàng gốc lấy từ API
-const orders = ref([])
-// Danh sách đơn hàng sau khi lọc, tìm kiếm, sắp xếp
-const filteredOrders = ref([])
-// Trạng thái loading khi gọi API
-const loading = ref(false)
-// Biến lưu lỗi nếu có
-const error = ref(null)
-// Giá trị tìm kiếm từ ô input
-const searchQuery = ref('')
-// Lọc theo trạng thái đơn hàng
-const statusFilter = ref('')
-// Lọc theo trạng thái thanh toán
-const paymentStatusFilter = ref('')
-// Trường dùng để sắp xếp (mặc định là ngày tạo)
-const sortField = ref('created_at')
-// Chiều sắp xếp (mặc định giảm dần)
-const sortDirection = ref('desc')
-// Phân trang: trang hiện tại
-const currentPage = ref(1)
-// Số đơn hàng mỗi trang
-const itemsPerPage = ref(10)
-// Modal chỉnh sửa đơn hàng
-const showEditModal = ref(false)
-// Đơn hàng đang chỉnh sửa
-const editingOrder = ref({})
+const orders = ref([]);
+const filteredOrders = ref([]);
+const loading = ref(false);
+const error = ref(null);
+const searchQuery = ref('');
+const statusFilter = ref('');
+const paymentStatusFilter = ref('');
+const sortField = ref('order_date');
+const sortDirection = ref('desc');
+const currentPage = ref(1);
+const itemsPerPage = ref(10);
+const selectedOrder = ref(null);
+const showDetailModal = ref(false);
 
 // =====================
 // Các computed property
 // =====================
-// Tính tổng số trang dựa trên số lượng đơn hàng đã lọc
-const totalPages = computed(() => Math.ceil(filteredOrders.value.length / itemsPerPage.value))
-// Lấy danh sách đơn hàng cho trang hiện tại
+const totalPages = computed(() => Math.ceil(filteredOrders.value.length / itemsPerPage.value));
 const paginatedOrders = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage.value;
   const end = start + itemsPerPage.value;
@@ -323,72 +314,109 @@ const paginatedOrders = computed(() => {
 });
 
 // =====================
+// Fetch orders from API
+// =====================
+const fetchOrders = async () => {
+  loading.value = true;
+  error.value = null;
+
+  try {
+    let url = 'http://localhost:8000/api/v1/orders/filter?';
+
+    if (statusFilter.value) {
+      url += `status=${statusFilter.value}&`;
+    }
+
+    if (paymentStatusFilter.value) {
+      url += `payment_status=${paymentStatusFilter.value}&`;
+    }
+
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      orders.value = data.orders || [];
+      applyFilters();
+    } else {
+      error.value = data.message || 'Không thể tải danh sách đơn hàng';
+    }
+  } catch (err) {
+    console.error('Error fetching orders:', err);
+    error.value = 'Lỗi kết nối đến máy chủ. Vui lòng thử lại sau.';
+  } finally {
+    loading.value = false;
+  }
+};
+
+// =====================
 // Hàm lọc, tìm kiếm, sắp xếp
 // =====================
-// Hàm này sẽ lọc, tìm kiếm và sắp xếp lại danh sách đơn hàng mỗi khi có thay đổi
 const applyFilters = () => {
-  let filtered = [...orders.value]
-  // --- Tìm kiếm ---
+  let filtered = [...orders.value];
+
+  // Áp dụng tìm kiếm
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase().trim();
-    filtered = filtered.filter((order) => {
-      // Gom các trường cần tìm kiếm vào mảng
-      const fields = [
-        order.id?.toString().toLowerCase(),
-        (order.created_at || order.order_date)?.toLowerCase(),
-        (order.customer_name || '').toLowerCase(),
-        (order.customer_email || '').toLowerCase(),
-        // Ngày đặt dạng vi-VN
-        order.created_at || order.order_date
-          ? new Date(order.created_at || order.order_date)
-            .toLocaleDateString('vi-VN')
-            .toLowerCase()
-          : '',
-      ];
-      // Nếu query xuất hiện ở bất kỳ trường nào thì giữ lại
-      return fields.some((field) => field && field.includes(query));
+    filtered = filtered.filter(order => {
+      return (
+        (order.order_id?.toString() || '').toLowerCase().includes(query) ||
+        (order.customer_name || '').toLowerCase().includes(query) ||
+        (order.phone || '').toLowerCase().includes(query)
+      );
     });
   }
-  // --- Lọc theo trạng thái đơn hàng ---
-  if (statusFilter.value) {
-    filtered = filtered.filter((order) => order.status === statusFilter.value);
-  }
-  // --- Lọc theo trạng thái thanh toán ---
-  if (paymentStatusFilter.value) {
-    filtered = filtered.filter(
-      (order) => order.payment_status === paymentStatusFilter.value
-    );
-  }
-  // --- Sắp xếp ---
+
+  // Sắp xếp
   filtered.sort((a, b) => {
     let aVal = a[sortField.value];
     let bVal = b[sortField.value];
+
     if (sortField.value === 'total_amount') {
       aVal = parseFloat(aVal);
       bVal = parseFloat(bVal);
     }
+
     if (sortDirection.value === 'asc') {
       return aVal > bVal ? 1 : -1;
     } else {
       return aVal < bVal ? 1 : -1;
     }
-  })
-  filteredOrders.value = filtered
-  currentPage.value = 1 // Reset về trang đầu khi lọc
-}
+  });
+
+  filteredOrders.value = filtered;
+  currentPage.value = 1; // Reset về trang đầu khi lọc
+};
 
 // =====================
 // Các hàm format dữ liệu hiển thị
 // =====================
 // Định dạng ngày theo chuẩn Việt Nam
 const formatDate = date => {
-  return new Date(date).toLocaleDateString('vi-VN')
-}
+  if (!date) return 'N/A';
+  return new Date(date).toLocaleDateString('vi-VN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
+
 // Định dạng giá tiền VND
 const formatPrice = price => {
+  if (!price) return '0 đ';
   return new Intl.NumberFormat('vi-VN', {
     style: 'currency',
     currency: 'VND',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
   }).format(price);
 };
 
@@ -398,105 +426,104 @@ const formatPrice = price => {
 // Chuyển trạng thái đơn hàng sang tiếng Việt
 const getStatusText = status => {
   const statusMap = {
-    pending: 'Chờ xác nhận',
-    processing: 'Đang xử lý',
-    shipped: 'Đang giao hàng',
-    delivered: 'Đã nhận hàng',
-    cancelled: 'Đã hủy',
-    'Chờ xác nhận': 'Chờ xác nhận',
-    'Đang xử lý': 'Đang xử lý',
-    'Đang giao hàng': 'Đang giao hàng',
-    'Đã nhận': 'Đã nhận hàng',
-    'Đã hủy': 'Đã hủy'
-  }
-  return statusMap[status] || status
-}
-// Chuyển phương thức thanh toán sang tiếng Việt
-const getPaymentMethodText = method => {
-  const methodMap = {
-    cod: 'Thanh toán khi nhận hàng',
-    bank_transfer: 'Chuyển khoản ngân hàng',
-    credit_card: 'Thẻ tín dụng',
-    'Thanh toán khi nhận hàng': 'Thanh toán khi nhận hàng',
-    'Chuyển khoản ngân hàng': 'Chuyển khoản ngân hàng',
-    'Thẻ tín dụng': 'Thẻ tín dụng'
-  }
-  return methodMap[method] || method
-}
+    '0': 'Đã hủy',
+    '1': 'Đang xử lý',
+    '2': 'Đang giao hàng',
+    '3': 'Đã hoàn thành'
+  };
+  return statusMap[status] || 'Không xác định';
+};
+
 // Chuyển trạng thái thanh toán sang tiếng Việt
 const getPaymentStatusText = status => {
   const statusMap = {
-    pending: 'Chờ thanh toán',
-    paid: 'Đã thanh toán',
-    failed: 'Thanh toán thất bại',
-    'Chờ thanh toán': 'Chờ thanh toán',
-    'Đã thanh toán': 'Đã thanh toán',
-    'Thanh toán thất bại': 'Thanh toán thất bại',
+    '0': 'Chưa thanh toán',
+    '1': 'Đã thanh toán'
   };
-  return statusMap[status] || status;
+  return statusMap[status] || 'Không xác định';
 };
 
-// =====================
-// Cập nhật trạng thái đơn hàng
-// =====================
-// Mở modal cập nhật trạng thái đơn hàng
-const editOrder = async orderId => {
+// ...existing code...
+
+// Xem chi tiết đơn hàng trong popup
+const viewOrderDetail = async (order) => {
   try {
-    loading.value = true
-    // Tìm đơn hàng theo id trong danh sách đã lấy về
-    const order = orders.value.find(o => o.id === orderId)
-    if (order) {
-      editingOrder.value = { ...order };
-      showEditModal.value = true;
-    }
-  } catch (err) {
-    error.value = 'Không thể tải thông tin đơn hàng';
-    console.error(err);
-  } finally {
-    loading.value = false;
-  }
-}
-// Lưu thay đổi trạng thái đơn hàng
-const saveOrderChanges = async () => {
-  try {
-    loading.value = true
-    // Gọi API cập nhật trạng thái đơn hàng
-    const updatedOrder = await orderService.update(editingOrder.value.id, {
-      status: editingOrder.value.status,
-      payment_status: editingOrder.value.payment_status
-    })
-    if (updatedOrder) {
-      // Cập nhật lại đơn hàng trong danh sách
-      const index = orders.value.findIndex(order => order.id === editingOrder.value.id)
-      if (index !== -1) {
-        orders.value[index] = { ...editingOrder.value };
-        applyFilters();
-        showEditModal.value = false;
+    loading.value = true;
+    showDetailModal.value = true;
+    
+    // Set basic order info from the list first
+    selectedOrder.value = order;
+    
+    // Then fetch full details
+    const response = await fetch(`http://localhost:8000/api/v1/orders/${order.order_id}`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
       }
+    });
+
+    const data = await response.json();
+    
+    if (data) {
+      // Process the order details
+      const orderDetails = data;
+      
+      // Create a structured order object with details
+      const detailedOrder = {
+        ...order,
+        orderDetails: orderDetails,
+        productDetails: processOrderDetails(orderDetails)
+      };
+      
+      // Update the selected order with detailed information
+      selectedOrder.value = detailedOrder;
+      
     }
   } catch (err) {
-    error.value = err.message;
-    console.error(err);
+    console.error('Error fetching order details:', err);
+    error.value = 'Không thể tải chi tiết đơn hàng';
   } finally {
     loading.value = false;
   }
+};
+
+// Process order details to group products
+const processOrderDetails = (details) => {
+  if (!Array.isArray(details) || details.length === 0) return [];
+
+  // Group by product_id to avoid duplicates
+  const productMap = {};
+  
+  details.forEach(item => {
+    if (!productMap[item.product_id]) {
+      productMap[item.product_id] = {
+        product_id: item.product_id,
+        name: item.product_name,
+        count: parseInt(item.quantity) || 0,
+        price: parseFloat(item.unit_price) || 0,
+        image: item.image || "https://via.placeholder.com/100",
+        category: item.category || "Sản phẩm"
+      };
+    } else {
+      // If product exists, add to the count
+      productMap[item.product_id].count += parseInt(item.quantity) || 0;
+    }
+  });
+  
+  return Object.values(productMap);
+};
+
+// Đóng modal chi tiết đơn hàng
+const closeDetailModal = () => {
+  showDetailModal.value = false;
+  selectedOrder.value = null;
 };
 
 // =====================
 // Load dữ liệu ban đầu
 // =====================
-onMounted(async () => {
-  try {
-    loading.value = true
-    // Gọi API lấy danh sách đơn hàng khi trang được tải
-    const response = await axios.get('/orders')
-    orders.value = response.data
-    applyFilters()
-  } catch (err) {
-    error.value = 'Không thể tải danh sách đơn hàng';
-    console.error(err);
-  } finally {
-    loading.value = false;
-  }
+onMounted(() => {
+  fetchOrders();
 });
 </script>

@@ -13,11 +13,16 @@ const cartTotal = computed(() => total.value)
 const itemCount = computed(() => items.value.length)
 
 // Actions
-const fetchCart = async (customerId) => {
+const fetchCart = async () => {
   try {
     loading.value = true
-    const response = await axios.get(`/cart/${customerId}`)
-    items.value = response.data.items
+    // Updated API endpoint with prefix
+    const response = await axios.get('http://localhost:8000/api/v1/cart', {
+      withCredentials: true
+    })
+    console.log(response);
+    
+    items.value = response.data.items || []
     calculateTotal()
   } catch (err) {
     error.value = 'Không thể tải giỏ hàng'
@@ -27,13 +32,17 @@ const fetchCart = async (customerId) => {
   }
 }
 
-const addItem = async (customerId, product) => {
+const addItem = async (product) => {
   try {
     loading.value = true
-    await axios.post(`/cart/${customerId}`, {
+    // Updated API endpoint with prefix
+    await axios.post('http://localhost:8000/api/v1/cart', {
       product_id: product.id,
       quantity: 1
+    }, {
+      withCredentials: true
     })
+    
     const existingItem = items.value.find(item => item.id === product.id)
     if (existingItem) {
       existingItem.quantity++
@@ -52,17 +61,18 @@ const addItem = async (customerId, product) => {
   }
 }
 
-const removeItem = async (customerId, productId) => {
+const removeItem = async (productId) => {
   try {
     loading.value = true
-    const cartItem = items.value.find(item => item.id === productId)
-    if (cartItem) {
-      await axios.delete(`/cart/${cartItem.cart_item_id}/${productId}`)
-      const index = items.value.findIndex(item => item.id === productId)
-      if (index > -1) {
-        items.value.splice(index, 1)
-        calculateTotal()
-      }
+    // Updated API endpoint with prefix
+    await axios.delete(`http://localhost:8000/api/v1/cart/${productId}`, {
+      withCredentials: true
+    })
+    
+    const index = items.value.findIndex(item => item.id === productId)
+    if (index > -1) {
+      items.value.splice(index, 1)
+      calculateTotal()
     }
   } catch (err) {
     error.value = 'Không thể xóa sản phẩm khỏi giỏ hàng'
@@ -72,15 +82,19 @@ const removeItem = async (customerId, productId) => {
   }
 }
 
-const updateQuantity = async (customerId, productId, quantity) => {
+const updateQuantity = async (productId, quantity) => {
   try {
     loading.value = true
+    // Updated API endpoint with prefix
+    await axios.put('/api/v1/cart', {
+      product_id: productId,
+      quantity: quantity
+    }, {
+      withCredentials: true
+    })
+    
     const cartItem = items.value.find(item => item.id === productId)
     if (cartItem) {
-      await axios.put(`/cart/${customerId}`, {
-        product_id: productId,
-        quantity: quantity
-      })
       cartItem.quantity = quantity
       calculateTotal()
     }
@@ -98,10 +112,14 @@ const calculateTotal = () => {
   }, 0)
 }
 
-const clearCart = async (customerId) => {
+const clearCart = async () => {
   try {
     loading.value = true
-    await axios.delete(`/cart/${customerId}`)
+    // Updated API endpoint with prefix
+    await axios.delete('/api/v1/cart', {
+      withCredentials: true
+    })
+    
     items.value = []
     total.value = 0
   } catch (err) {
