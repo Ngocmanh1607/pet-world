@@ -5,12 +5,8 @@
       <span>
         Hiển thị {{ filteredCustomers.length }} từ {{ customers.length }} kết quả tìm kiếm
       </span>
-      <AdminSearchBar
-        v-model="searchQuery"
-        placeholder="Tìm kiếm khách hàng theo tên, email hoặc ID..."
-        @input="() => {}"
-        class="search-input"
-      />
+      <AdminSearchBar v-model="searchQuery" placeholder="Tìm kiếm khách hàng theo tên, email hoặc ID..."
+        @input="() => { }" class="search-input" />
     </div>
 
     <!-- Hiển thị trạng thái tải hoặc lỗi -->
@@ -68,7 +64,7 @@ const searchQuery = ref('')
 // Gọi API lấy danh sách khách hàng
 onMounted(async () => {
   try {
-    const response = await fetch('http://localhost:8000/customers')
+    const response = await fetch('https://9ad9-116-110-40-129.ngrok-free.app/customers')
     if (!response.ok) throw new Error('Không thể tải danh sách khách hàng')
     const data = await response.json()
     customers.value = data

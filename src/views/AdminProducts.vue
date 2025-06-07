@@ -14,6 +14,7 @@
   padding: 6px 16px;
   font-weight: 500;
 }
+
 .custom-btn:hover {
   background-color: #fd7e14;
   color: white;
@@ -23,30 +24,37 @@
 .custom-table thead {
   background-color: #f1f3f5;
 }
+
 .custom-table th {
   font-weight: 600;
   font-size: 14px;
   white-space: nowrap;
   vertical-align: middle;
-  cursor: pointer; /* Thêm con trỏ để người dùng biết có thể click */
+  cursor: pointer;
+  /* Thêm con trỏ để người dùng biết có thể click */
 }
+
 .custom-table td {
   vertical-align: middle;
   font-size: 14px;
   text-align: center;
 }
+
 .custom-table tbody tr:nth-child(even) {
   background-color: #faf5ff;
 }
+
 .action-icon {
   color: #fd7e14;
   cursor: pointer;
   transition: 0.2s ease;
 }
+
 .action-icon:hover {
   transform: scale(1.1);
   opacity: 0.8;
 }
+
 .sort-indicator {
   font-size: 12px;
   margin-left: 6px;
@@ -57,8 +65,7 @@
 <template>
   <div class="container-fluid bg-white">
     <div
-      class="w-container mb-3 mx-auto p-3 rounded flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
-    >
+      class="w-container mb-3 mx-auto p-3 rounded flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <h2 class="mx-1 text-zinc-700 text-xl">Danh sách sản phẩm</h2>
       <button class="btn mx-1 custom-btn" @click="openCreatePopup">
         + Thêm sản phẩm
@@ -67,12 +74,8 @@
 
     <!-- Thanh Search -->
     <div class="w-container mx-auto mb-3" style="width: 94%">
-      <input
-        type="text"
-        v-model="searchTerm"
-        placeholder="Tìm kiếm sản phẩm theo tên..."
-        class="form-control p-2 border border-gray-300 rounded w-full"
-      />
+      <input type="text" v-model="searchTerm" placeholder="Tìm kiếm sản phẩm theo tên..."
+        class="form-control p-2 border border-gray-300 rounded w-full" />
     </div>
 
     <!-- Table -->
@@ -114,15 +117,8 @@
             <td>{{ formatCurrency(item.discount_price) }}</td>
             <td>{{ item.stock }}</td>
             <td class="text-center">
-              <i
-                class="fas fa-edit action-icon me-2"
-                @click="openEditPopup(item)"
-                style="cursor: pointer"
-              ></i>
-              <i
-                class="fas fa-trash-alt action-icon"
-                @click="deleteProduct(item.product_id)"
-              ></i>
+              <i class="fas fa-edit action-icon me-2" @click="openEditPopup(item)" style="cursor: pointer"></i>
+              <i class="fas fa-trash-alt action-icon" @click="deleteProduct(item.product_id)"></i>
             </td>
           </tr>
           <tr v-if="filteredAndSortedProducts.length === 0">
@@ -134,10 +130,7 @@
       </table>
     </div>
     <!-- Popup Edit -->
-    <div
-      v-if="editingProduct"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-    >
+    <div v-if="editingProduct" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div class="bg-white rounded p-6 w-[420px] max-w-full">
         <h3 class="text-lg font-semibold mb-4 text-center">
           Thông tin sản phẩm
@@ -145,103 +138,60 @@
         <form @submit.prevent="saveEdit">
           <div class="mb-1">
             <label class="block mb-1 font-medium text-sm">Tên sản phẩm</label>
-            <input
-              v-model="editingProduct.product_name"
-              type="text"
-              class="w-full border border-gray-300 rounded text-sm"
-              required
-            />
+            <input v-model="editingProduct.product_name" type="text"
+              class="w-full border border-gray-300 rounded text-sm" required />
           </div>
 
           <div class="mb-3">
             <label class="block mb-1 font-medium text-sm">Giá gốc</label>
-            <input
-              v-model.number="editingProduct.base_price"
-              type="number"
-              min="0"
-              class="w-full border border-gray-300 rounded p-1 text-sm"
-              required
-            />
+            <input v-model.number="editingProduct.base_price" type="number" min="0"
+              class="w-full border border-gray-300 rounded p-1 text-sm" required />
           </div>
 
           <div class="mb-3">
             <label class="block mb-1 font-medium text-sm">Giá tiền</label>
-            <input
-              v-model.number="editingProduct.discount_price"
-              type="number"
-              min="0"
-              class="w-full border border-gray-300 rounded p-1 text-sm"
-              required
-            />
+            <input v-model.number="editingProduct.discount_price" type="number" min="0"
+              class="w-full border border-gray-300 rounded p-1 text-sm" required />
           </div>
 
           <div class="mb-3">
             <label class="block mb-1 font-medium text-sm">Loại thú cưng</label>
-            <input
-              v-model="editingProduct.pet_type"
-              type="text"
-              class="w-full border border-gray-300 rounded p-1 text-sm"
-            />
+            <input v-model="editingProduct.pet_type" type="text"
+              class="w-full border border-gray-300 rounded p-1 text-sm" />
           </div>
 
           <div class="mb-3">
             <label class="block mb-1 font-medium text-sm">Hàng tồn kho</label>
-            <input
-              v-model.number="editingProduct.stock"
-              type="number"
-              min="0"
-              class="w-full border border-gray-300 rounded p-1 text-sm"
-            />
+            <input v-model.number="editingProduct.stock" type="number" min="0"
+              class="w-full border border-gray-300 rounded p-1 text-sm" />
           </div>
 
           <div class="mb-3">
             <label class="block mb-1 font-medium text-sm">Mô tả sản phẩm</label>
-            <textarea
-              v-model="editingProduct.description"
-              rows="3"
-              class="w-full border border-gray-300 rounded p-2 text-sm"
-            ></textarea>
+            <textarea v-model="editingProduct.description" rows="3"
+              class="w-full border border-gray-300 rounded p-2 text-sm"></textarea>
           </div>
 
           <div class="mb-3">
-            <label class="block mb-1 font-medium text-sm"
-              >Trạng thái hoạt động</label
-            >
+            <label class="block mb-1 font-medium text-sm">Trạng thái hoạt động</label>
             <div class="flex items-center gap-4">
               <label class="inline-flex items-center text-sm">
-                <input
-                  type="radio"
-                  :value="1"
-                  v-model.number="editingProduct.is_active"
-                  class="form-radio"
-                />
+                <input type="radio" :value="1" v-model.number="editingProduct.is_active" class="form-radio" />
                 <span class="ml-2 select-none">Có</span>
               </label>
 
               <label class="inline-flex items-center text-sm">
-                <input
-                  type="radio"
-                  :value="0"
-                  v-model.number="editingProduct.is_active"
-                  class="form-radio"
-                />
+                <input type="radio" :value="0" v-model.number="editingProduct.is_active" class="form-radio" />
                 <span class="ml-2 select-none">Không</span>
               </label>
             </div>
           </div>
 
           <div class="flex justify-end gap-3 mt-4">
-            <button
-              type="button"
-              @click="closeEditPopup"
-              class="px-4 py-2 border rounded hover:bg-gray-200 text-sm"
-            >
+            <button type="button" @click="closeEditPopup" class="px-4 py-2 border rounded hover:bg-gray-200 text-sm">
               Hủy
             </button>
-            <button
-              type="submit"
-              class="px-4 py-2 bg-[#fd7e14] text-white rounded hover:bg-[#e26a00] text-sm"
-            >
+            <button type="submit" class="px-4 py-2 bg-[#fd7e14] text-white rounded hover:bg-[#e26a00] text-sm">
               Lưu
             </button>
           </div>
@@ -249,10 +199,7 @@
       </div>
     </div>
     <!-- Popup Create -->
-    <div
-      v-if="creatingProduct"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-    >
+    <div v-if="creatingProduct" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div class="bg-white rounded p-6 w-[420px] max-w-full">
         <h3 class="text-lg font-semibold mt-4 text-center">
           Thêm sản phẩm mới
@@ -260,66 +207,36 @@
         <form @submit.prevent="createProduct">
           <div class="mb-1">
             <label class="block mb-1 font-medium text-sm">Tên sản phẩm</label>
-            <input
-              v-model="creatingProduct.product_name"
-              type="text"
-              class="w-full border border-gray-300 rounded text-sm"
-              required
-            />
+            <input v-model="creatingProduct.product_name" type="text"
+              class="w-full border border-gray-300 rounded text-sm" required />
           </div>
 
           <div class="mb-1">
             <label class="block mb-1 font-medium text-sm">Giá gốc</label>
-            <input
-              v-model.number="creatingProduct.base_price"
-              type="number"
-              min="0"
-              class="w-full border border-gray-300 rounded text-sm"
-              required
-            />
+            <input v-model.number="creatingProduct.base_price" type="number" min="0"
+              class="w-full border border-gray-300 rounded text-sm" required />
           </div>
           <div class="mb-1">
             <label class="block mb-1 font-medium text-sm">Giá tiền</label>
-            <input
-              v-model.number="creatingProduct.discount_price"
-              type="number"
-              min="0"
-              class="w-full border border-gray-300 rounded text-sm"
-              required
-            />
+            <input v-model.number="creatingProduct.discount_price" type="number" min="0"
+              class="w-full border border-gray-300 rounded text-sm" required />
           </div>
           <div class="mb-1">
             <label class="block mb-1 font-medium text-sm">Loại thú cưng</label>
-            <input
-              v-model="creatingProduct.pet_type"
-              type="text"
-              class="w-full border border-gray-300 rounded text-sm"
-            />
+            <input v-model="creatingProduct.pet_type" type="text"
+              class="w-full border border-gray-300 rounded text-sm" />
           </div>
 
           <div class="mb-1">
             <label class="block mb-1 font-medium text-sm">Hàng tồn kho</label>
-            <input
-              v-model.number="creatingProduct.stock"
-              type="number"
-              min="0"
-              class="w-full border border-gray-300 rounded text-sm"
-            />
+            <input v-model.number="creatingProduct.stock" type="number" min="0"
+              class="w-full border border-gray-300 rounded text-sm" />
           </div>
           <div class="mb-1">
-            <label class="block mb-1 font-medium text-sm"
-              >Danh mục sản phẩm</label
-            >
-            <select
-              v-model="creatingProduct.category_id"
-              class="w-full border border-gray-300 rounded p-1 text-sm"
-            >
+            <label class="block mb-1 font-medium text-sm">Danh mục sản phẩm</label>
+            <select v-model="creatingProduct.category_id" class="w-full border border-gray-300 rounded p-1 text-sm">
               <option value="" disabled>-- Chọn danh mục --</option>
-              <option
-                v-for="category in categories"
-                :key="category.category_id"
-                :value="category.category_id"
-              >
+              <option v-for="category in categories" :key="category.category_id" :value="category.category_id">
                 {{ category.category_name }}
               </option>
             </select>
@@ -327,61 +244,35 @@
 
           <div class="mb-1">
             <label class="block mb-1 font-medium text-sm">Ảnh</label>
-            <input
-              type="file"
-              @change="handleImageUpload"
-              accept="image/*"
-              class="w-full border border-gray-300 rounded p-1 text-sm"
-            />
+            <input type="file" @change="handleImageUpload" accept="image/*"
+              class="w-full border border-gray-300 rounded p-1 text-sm" />
           </div>
 
           <div class="mb-1">
             <label class="block mb-1 font-medium text-sm">Mô tả sản phẩm</label>
-            <textarea
-              v-model="creatingProduct.description"
-              rows="3"
-              class="w-full border border-gray-300 rounded p-2 text-sm"
-            ></textarea>
+            <textarea v-model="creatingProduct.description" rows="3"
+              class="w-full border border-gray-300 rounded p-2 text-sm"></textarea>
           </div>
 
           <div class="mb-1">
-            <label class="block mb-1 font-medium text-sm"
-              >Trạng thái hoạt động</label
-            >
+            <label class="block mb-1 font-medium text-sm">Trạng thái hoạt động</label>
             <div class="flex items-center gap-4">
               <label class="inline-flex items-center text-sm">
-                <input
-                  type="radio"
-                  value="1"
-                  v-model="creatingProduct.is_active"
-                  class="form-radio"
-                />
+                <input type="radio" value="1" v-model="creatingProduct.is_active" class="form-radio" />
                 <span class="ml-2 select-none">Có</span>
               </label>
               <label class="inline-flex items-center text-sm">
-                <input
-                  type="radio"
-                  value="0"
-                  v-model="creatingProduct.is_active"
-                  class="form-radio"
-                />
+                <input type="radio" value="0" v-model="creatingProduct.is_active" class="form-radio" />
                 <span class="ml-2 select-none">Không</span>
               </label>
             </div>
           </div>
 
           <div class="flex justify-end gap-3 mb-3">
-            <button
-              type="button"
-              @click="closeCreatePopup"
-              class="px-4 py-2 border rounded hover:bg-gray-200 text-sm"
-            >
+            <button type="button" @click="closeCreatePopup" class="px-4 py-2 border rounded hover:bg-gray-200 text-sm">
               Hủy
             </button>
-            <button
-              type="submit"
-              class="px-4 py-2 bg-[#fd7e14] text-white rounded hover:bg-[#e26a00] text-sm"
-            >
+            <button type="submit" class="px-4 py-2 bg-[#fd7e14] text-white rounded hover:bg-[#e26a00] text-sm">
               Thêm
             </button>
           </div>
@@ -389,29 +280,17 @@
       </div>
     </div>
     <div class="flex justify-center items-center gap-3 my-4">
-      <button
-        class="px-3 py-1 border rounded disabled:opacity-50"
-        :disabled="currentPage === 1"
-        @click="currentPage--"
-      >
+      <button class="px-3 py-1 border rounded disabled:opacity-50" :disabled="currentPage === 1" @click="currentPage--">
         <i class="fa-solid fa-chevron-left"></i>
       </button>
 
-      <button
-        v-for="page in totalPages"
-        :key="page"
-        class="px-3 py-1 border rounded"
-        :class="{ 'bg-orange-400 text-white': page === currentPage }"
-        @click="currentPage = page"
-      >
+      <button v-for="page in totalPages" :key="page" class="px-3 py-1 border rounded"
+        :class="{ 'bg-orange-400 text-white': page === currentPage }" @click="currentPage = page">
         {{ page }}
       </button>
 
-      <button
-        class="px-3 py-1 border rounded disabled:opacity-50"
-        :disabled="currentPage === totalPages"
-        @click="currentPage++"
-      >
+      <button class="px-3 py-1 border rounded disabled:opacity-50" :disabled="currentPage === totalPages"
+        @click="currentPage++">
         <i class="fa-solid fa-chevron-right"></i>
       </button>
     </div>
@@ -483,7 +362,7 @@ export default {
     async fetchProducts() {
       this.loading = true;
       try {
-        const res = await fetch('http://localhost:8000/api/v1/products');
+        const res = await fetch('https://9ad9-116-110-40-129.ngrok-free.app/api/v1/products');
         if (!res.ok) throw new Error('Failed to fetch products');
         this.products = await res.json();
       } catch (err) {
@@ -522,7 +401,7 @@ export default {
         this.loading = true;
         const token = this.getCookie('token');
         const res = await fetch(
-          `http://localhost:8000/api/v1/products/${this.editingProduct.product_id}`,
+          `https://9ad9-116-110-40-129.ngrok-free.app/api/v1/products/${this.editingProduct.product_id}`,
           {
             method: 'PUT',
             headers: {
@@ -577,7 +456,7 @@ export default {
       try {
         this.loading = true;
         const token = this.getCookie('token');
-        const res = await fetch('http://localhost:8000/api/v1/products', {
+        const res = await fetch('https://9ad9-116-110-40-129.ngrok-free.app/api/v1/products', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -629,7 +508,7 @@ export default {
     async fetchCategories() {
       this.loadingCategories = true;
       try {
-        const res = await fetch('http://localhost:8000/api/v1/categories');
+        const res = await fetch('https://9ad9-116-110-40-129.ngrok-free.app/api/v1/categories');
         if (!res.ok) throw new Error('Lỗi khi lấy danh sách categories');
         this.categories = await res.json();
       } catch (error) {

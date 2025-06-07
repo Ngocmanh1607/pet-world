@@ -39,7 +39,7 @@ export default {
       console.log("Đăng ký:", this.username, this.password);
 
       try {
-        const response = await fetch('http://localhost:8000/user/register', {
+        const response = await fetch('https://9ad9-116-110-40-129.ngrok-free.app/user/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -78,26 +78,31 @@ export default {
   justify-content: center;
   padding: 2rem;
 }
+
 .logo {
   width: 180px;
   margin-bottom: 2rem;
 }
+
 .title {
   font-size: 24px;
   font-weight: bold;
   margin-bottom: 1.5rem;
 }
+
 form {
   width: 100%;
   max-width: 320px;
   display: flex;
   flex-direction: column;
 }
+
 label {
   margin-top: 1rem;
   margin-bottom: 0.25rem;
   font-weight: 500;
 }
+
 input {
   padding: 10px;
   border: 1px solid #ccc;
@@ -105,6 +110,7 @@ input {
   border-radius: 5px;
   font-size: 14px;
 }
+
 button {
   margin-top: 1.5rem;
   padding: 10px;
@@ -115,20 +121,24 @@ button {
   border-radius: 6px;
   cursor: pointer;
 }
+
 button:hover {
   background-color: #d88400;
 }
+
 .links {
   margin-top: 1rem;
   text-align: center;
   font-size: 14px;
 }
+
 .links a {
   font-weight: bold;
   color: #f49a00;
   text-decoration: none;
   cursor: pointer;
 }
+
 .links a:hover {
   text-decoration: underline;
   color: #d88400;

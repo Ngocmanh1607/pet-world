@@ -7,21 +7,17 @@
         <span>+84 123 456 789</span>
         <span class="text-primary"><i class="fas fa-envelope"></i></span>
         <span>wearepet@petshop.com</span>
-        
+
         <span class="text-primary"><i class="fas fa-map-marker-alt"></i></span>
-        <span
-          >123 Lý Thường Kiệt, Phường 3, Quận 10, Thành phố Hồ Chí Minh</span
-        >
+        <span>123 Lý Thường Kiệt, Phường 3, Quận 10, Thành phố Hồ Chí Minh</span>
       </div>
       <div class="flex items-center gap-2 min-w-[160px] justify-end">
         <span class="text-primary"><i class="fas fa-user"></i></span>
-        <span v-if="isLoggedIn">{{ userName }}</span>
-        <router-link
-          v-else
-          to="/login"
-          class="text-gray-800 hover:text-orange-500"
-        >
-      Đăng nhập
+        <router-link v-if="isLoggedIn" to="/account" class="text-gray-800 hover:text-orange-500">
+          {{ userName }}
+        </router-link>
+        <router-link v-else to="/login" class="text-gray-800 hover:text-orange-500">
+          Đăng nhập
         </router-link>
       </div>
 
@@ -30,35 +26,19 @@
     <!-- Navbar -->
     <nav>
       <div class="flex items-center font-bold text-xl">
-        <span class="text-2xl mr-2 text-primary"
-          ><i class="fas fa-paw"></i
-        ></span>
-        <router-link to="/" class="text-gray-800 hover:text-orange-500"
-          >Pet World</router-link
-        >
+        <span class="text-2xl mr-2 text-primary"><i class="fas fa-paw"></i></span>
+        <router-link to="/" class="text-gray-800 hover:text-orange-500">Pet World</router-link>
       </div>
       <ul>
-        <li
-          v-for="(item, index) in menuItems"
-          :key="index"
-          :class="{ 'active-menu': item.isActive }"
-        >
-          <router-link
-            :to="item.path"
-            class="text-gray-800 hover:text-orange-500 transition-all duration-200"
-          >
+        <li v-for="(item, index) in menuItems" :key="index" :class="{ 'active-menu': item.isActive }">
+          <router-link :to="item.path" class="text-gray-800 hover:text-orange-500 transition-all duration-200">
             {{ item.name }}
           </router-link>
         </li>
       </ul>
       <div class="flex items-center">
         <div class="search-box">
-          <input
-            type="text"
-            v-model="searchQuery"
-            placeholder="Tìm kiếm sản phẩm"
-            @keyup.enter="handleSearch"
-          />
+          <input type="text" v-model="searchQuery" placeholder="Tìm kiếm sản phẩm" @keyup.enter="handleSearch" />
           <span class="search-icon" @click="handleSearch">
             <i class="fas fa-search"></i>
           </span>
@@ -121,6 +101,7 @@ onMounted(() => {
 header {
   background: #fafbfc;
 }
+
 .topbar {
   display: flex;
   justify-content: space-between;
@@ -129,16 +110,19 @@ header {
   color: #222;
   padding: 10px 40px 0 40px;
 }
+
 .topbar .flex-1 {
   flex: 1;
   display: flex;
   justify-content: center;
 }
+
 .topbar span,
 .topbar a {
   margin-right: 10px;
   color: #222;
 }
+
 .topbar .text-primary {
   color: #ff9800;
 }
@@ -155,10 +139,12 @@ nav {
   height: 60px;
   position: relative;
 }
+
 nav .font-bold {
   font-weight: 700;
   font-size: clamp(1.1rem, 2vw, 1.3rem);
 }
+
 nav ul {
   display: flex;
   gap: 36px;
@@ -167,23 +153,27 @@ nav ul {
   padding: 0;
   align-items: center;
 }
+
 nav ul li {
   font-weight: 600;
   font-size: 1.1rem;
   position: relative;
 }
-nav ul li.active-menu > a,
+
+nav ul li.active-menu>a,
 nav ul li.active-menu {
   color: #ff9800 !important;
   border-bottom: 3px solid #ff9800;
   padding-bottom: 2px;
 }
+
 nav ul li a {
   color: #222;
   text-decoration: none;
   transition: color 0.2s;
   border-bottom: none !important;
 }
+
 nav ul li a:hover {
   color: #ff9800;
   border-bottom: none !important;
@@ -198,6 +188,7 @@ nav .flex.items-center {
   display: flex;
   align-items: center;
 }
+
 .search-box input {
   width: 180px;
   padding: 8px 36px 8px 16px;
@@ -208,6 +199,7 @@ nav .flex.items-center {
   outline: none;
   color: #222;
 }
+
 .search-box .search-icon {
   position: absolute;
   right: 12px;
@@ -223,13 +215,16 @@ nav .flex.items-center {
   margin-right: 8px;
   cursor: pointer;
 }
+
 .icon-btn:last-child {
   margin-right: 0;
 }
+
 .icon-btn i {
   font-size: 2rem;
   color: #222;
 }
+
 .badge {
   position: absolute;
   top: -8px;
@@ -249,14 +244,17 @@ nav .flex.items-center {
 }
 
 @media (max-width: 900px) {
+
   .topbar,
   nav {
     padding-left: 10px;
     padding-right: 10px;
   }
+
   nav {
     margin: 20px 10px 0 10px;
   }
+
   nav ul {
     gap: 18px;
   }
@@ -354,6 +352,7 @@ nav .flex.items-center {
 
 /* Improve touch targets for mobile */
 @media (hover: none) {
+
   .mobile-menu-btn,
   .cart-icon,
   .mobile-menu-links a {
