@@ -237,6 +237,7 @@
 
 <script>
 import { productService } from '@/services/api';
+import { useRoute } from 'vue-router';
 
 export default {
   name: 'ProductList',
@@ -266,9 +267,21 @@ export default {
     };
   },
 
+  created() {
+    const route = useRoute();
+    if (route.query.category) {
+      this.selectedCategories = [route.query.category];
+    }
+  },
+
   mounted() {
     document.addEventListener('click', this.handleClickOutside);
     this.fetchProducts();
+    const route = useRoute();
+    if (this.initialLoad && route.query.category) {
+      this.handleInitialCategory(route.query.categoryName);
+    }
+    this.initialLoad = false;
   },
 
   beforeUnmount() {
@@ -298,6 +311,24 @@ export default {
         this.loading = false;
       }
     },
+    handleInitialCategory(categoryName) {
+      if (!this.selectedCategories.includes(categoryName)) {
+        this.selectedCategories = [categoryName];
+      }
+      this.handleFiltersChange();
+    },
+
+    clearAllFilters() {
+      this.selectedCategories = [];
+      this.selectedPets = [];
+      this.minPrice = this.min;
+      this.maxPrice = this.max;
+      // Clear query params
+      this.$router.replace({
+        query: {}
+      });
+    },
+
 
     setHoverProduct(id) {
       this.hoveredProductId = id;
@@ -359,14 +390,6 @@ export default {
       this.currentPage = 1;
     },
 
-    // New filter management methods
-    clearAllFilters() {
-      this.selectedCategories = [];
-      this.selectedPets = [];
-      this.minPrice = this.min;
-      this.maxPrice = this.max;
-    },
-
     removeCategory(category) {
       const index = this.selectedCategories.indexOf(category);
       if (index > -1) {
@@ -380,15 +403,10 @@ export default {
         this.selectedPets.splice(index, 1);
       }
     },
-
-    clearPriceFilter() {
-      this.minPrice = this.min;
-      this.maxPrice = this.max;
-    }
   },
-
   computed: {
     filteredProducts() {
+
       return this.products.filter((product) => {
         // Category filter - check against category_name from API
         const categoryMatch =
@@ -481,6 +499,14 @@ export default {
     },
     maxPrice() {
       this.handleFiltersChange();
+    },
+    '$route.query': {
+      handler(newQuery) {
+        if (newQuery.category && this.initialLoad) {
+          this.handleInitialCategory(newQuery.categoryName);
+        }
+      },
+      immediate: true
     }
   },
 };

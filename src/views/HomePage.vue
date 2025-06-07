@@ -7,17 +7,13 @@
         <h1>Thiên đường mua sắm dành cho thú cưng!</h1>
         <p class="slogan">Dịch vụ tận tâm – Trải nghiệm mua sắm độc đáo!</p>
         <div class="cta-buttons">
-          <router-link to="/products" class="cta-btn primary"
-            >Mua ngay</router-link
-          >
+          <router-link to="/products" class="cta-btn primary">Mua ngay</router-link>
         </div>
       </div>
       <div class="banner-img">
         <div class="hero-bg"></div>
-        <img
-          src="https://images.unsplash.com/photo-1518717758536-85ae29035b6d?auto=format&fit=crop&w=600&q=80"
-          alt="Dog and Cat"
-        />
+        <img src="https://images.unsplash.com/photo-1518717758536-85ae29035b6d?auto=format&fit=crop&w=600&q=80"
+          alt="Dog and Cat" />
         <span class="bird-icon">🕊️</span>
         <div class="paw-prints"></div>
       </div>
@@ -28,21 +24,17 @@
       <QuickCategory class="max-w-[1050px] w-full mx-auto"></QuickCategory>
 
       <!-- ProductCategorySection -->
-      <section class="mt-16 max-w-[972px] mx-auto">
-        <h2 class="text-3xl font-semibold">Danh mục sản phẩm</h2>
-        <div
-          class="grid grid-cols-1 gap-4 mt-11 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
-        >
-          <HomeCategory v-for="i in 4" :key="i"></HomeCategory>
+      <section class="mt-16 category-section">
+        <h2 class="section-title">Danh mục sản phẩm</h2>
+        <div class="category-container">
+          <HomeCategory />
         </div>
       </section>
 
       <!-- BestSellerSection -->
       <section class="mt-24 max-w-[972px] mx-auto">
         <h2 class="text-3xl font-semibold">Các sản phẩm bán chạy</h2>
-        <div
-          class="grid max-w-5xl grid-cols-1 gap-4 mx-auto mt-11 sm:grid-cols-2 md:grid-cols-3"
-        >
+        <div class="grid max-w-5xl grid-cols-1 gap-4 mx-auto mt-11 sm:grid-cols-2 md:grid-cols-3">
           <Product v-for="i in 3" :key="i"></Product>
         </div>
       </section>
@@ -55,21 +47,12 @@
 
       <!-- StoreSection -->
       <section class="mt-24 max-w-[1050px] mx-auto">
-        <h2
-          class="leading-[0.1em] bg-white border-b border-[#234BBB] text-center text-base font-bold"
-        >
-          <span class="px-2.5 pt-2.5 pb-0 bg-white text-[#234BBB]"
-            >Mua Trực Tiếp Tại Cửa Hàng</span
-          >
+        <h2 class="leading-[0.1em] bg-white border-b border-[#234BBB] text-center text-base font-bold">
+          <span class="px-2.5 pt-2.5 pb-0 bg-white text-[#234BBB]">Mua Trực Tiếp Tại Cửa Hàng</span>
         </h2>
         <div class="flex items-center justify-center mt-6 space-x-6">
-          <StoreLocation
-            v-for="store in stores"
-            :key="store.address"
-            :photo="store.photo"
-            :shop-name="store.shopName"
-            :address="store.address"
-          ></StoreLocation>
+          <StoreLocation v-for="store in stores" :key="store.address" :photo="store.photo" :shop-name="store.shopName"
+            :address="store.address"></StoreLocation>
         </div>
       </section>
     </div>
@@ -91,10 +74,12 @@ import { stores } from '@/data/store';
 .homepage {
   background: #fafafa;
 }
+
 .header-bar {
   background: #fff;
   border-bottom: 1px solid #eee;
 }
+
 .header-top {
   display: flex;
   justify-content: space-between;
@@ -102,28 +87,34 @@ import { stores } from '@/data/store';
   font-size: 0.95em;
   color: #333;
 }
+
 .header-user {
   color: #f90;
 }
+
 .header-nav {
   display: flex;
   align-items: center;
   gap: 24px;
   padding: 12px 32px;
 }
+
 .logo {
   height: 48px;
   margin-right: 16px;
 }
+
 .search-bar {
   display: flex;
   align-items: center;
 }
+
 .search-bar input {
   padding: 6px 12px;
   border: 1px solid #ddd;
   border-radius: 4px 0 0 4px;
 }
+
 .search-bar button {
   padding: 6px 10px;
   border: none;
@@ -131,9 +122,11 @@ import { stores } from '@/data/store';
   color: #fff;
   border-radius: 0 4px 4px 0;
 }
+
 .cart-link {
   position: relative;
 }
+
 .header-user-mobile {
   display: none;
 }
@@ -267,6 +260,7 @@ import { stores } from '@/data/store';
   justify-content: center;
   margin: 32px 0;
 }
+
 .quick-category {
   background: #fff;
   border-radius: 12px;
@@ -275,6 +269,7 @@ import { stores } from '@/data/store';
   text-align: center;
   cursor: pointer;
 }
+
 .quick-category img {
   width: 120px;
   height: 80px;
@@ -288,14 +283,17 @@ import { stores } from '@/data/store';
   padding: 32px;
   margin-bottom: 24px;
 }
+
 .product-category-list {
   display: flex;
   gap: 32px;
   justify-content: center;
 }
+
 .product-category-item {
   text-align: center;
 }
+
 .product-category-item img {
   width: 80px;
   height: 80px;
@@ -303,6 +301,7 @@ import { stores } from '@/data/store';
   border-radius: 8px;
   margin-bottom: 8px;
 }
+
 .product-category-item span {
   font-size: 1.125rem;
 }
@@ -313,14 +312,17 @@ import { stores } from '@/data/store';
   padding: 32px;
   margin-bottom: 24px;
 }
+
 .bestseller-list {
   display: flex;
   gap: 32px;
   justify-content: center;
 }
+
 .bestseller-item {
   text-align: center;
 }
+
 .bestseller-item img {
   width: 120px;
   height: 160px;
@@ -328,6 +330,7 @@ import { stores } from '@/data/store';
   border-radius: 8px;
   margin-bottom: 8px;
 }
+
 .bestseller-item span {
   font-size: 1.125rem;
 }
@@ -338,12 +341,14 @@ import { stores } from '@/data/store';
   padding: 32px;
   margin-bottom: 24px;
 }
+
 .brand-list {
   display: flex;
   gap: 24px;
   flex-wrap: wrap;
   justify-content: center;
 }
+
 .brand-list img {
   width: 100px;
   height: 40px;
@@ -357,14 +362,17 @@ import { stores } from '@/data/store';
   padding: 32px;
   margin-bottom: 24px;
 }
+
 .store-list {
   display: flex;
   gap: 32px;
   justify-content: center;
 }
+
 .store-item {
   text-align: center;
 }
+
 .store-item img {
   width: 180px;
   height: 120px;
@@ -372,6 +380,7 @@ import { stores } from '@/data/store';
   border-radius: 8px;
   margin-bottom: 8px;
 }
+
 .store-item span {
   font-size: 1.125rem;
 }
@@ -382,12 +391,15 @@ import { stores } from '@/data/store';
     margin: 0 10px;
     padding: 18px;
   }
+
   .banner-img {
     margin-top: 24px;
   }
+
   .banner-content {
     max-width: 100%;
   }
+
   .product-category-list,
   .bestseller-list,
   .store-list {
@@ -517,8 +529,59 @@ import { stores } from '@/data/store';
   transition: all 0.3s ease;
 }
 
+category-section {
+  max-width: 1200px;
+  margin: 4rem auto 0;
+  padding: 0 1.5rem;
+}
+
+.section-title {
+  font-size: 1.875rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 2.75rem;
+  text-align: center;
+}
+
+.category-container {
+  width: 100%;
+  background: transparent;
+  border-radius: 1rem;
+  padding: 1rem 0;
+}
+
+@media (max-width: 1024px) {
+  .category-container {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .category-section {
+    margin-top: 3rem;
+    padding: 0 1rem;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .category-section {
+    margin-top: 2rem;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+}
+
 /* Improve touch targets for mobile */
 @media (hover: none) {
+
   .cta-btn,
   .product-card button,
   .category-card {
