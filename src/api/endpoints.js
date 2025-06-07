@@ -7,7 +7,7 @@ export const API_ENDPOINTS = {
   },
   ORDERS: {
     GET_ALL: '/orders',
-    GET_ALL_CUS: (customerId) =>`/orders/customer/${customerId}`,
+    GET_ALL_CUS: `/orders/customer`,
     GET_DETAIL: (orderId) => `/orders/${orderId}`,
     CREATE_FROM_CART: '/orders/cart',
     CREATE_BUY_NOW: '/orders/buynow',

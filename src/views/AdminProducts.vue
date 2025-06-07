@@ -362,7 +362,7 @@ export default {
     async fetchProducts() {
       this.loading = true;
       try {
-        const res = await fetch('https://9ad9-116-110-40-129.ngrok-free.app/api/v1/products');
+        const res = await fetch('http://localhost:8000/api/v1/products');
         if (!res.ok) throw new Error('Failed to fetch products');
         this.products = await res.json();
       } catch (err) {
@@ -401,7 +401,7 @@ export default {
         this.loading = true;
         const token = this.getCookie('token');
         const res = await fetch(
-          `https://9ad9-116-110-40-129.ngrok-free.app/api/v1/products/${this.editingProduct.product_id}`,
+          `http://localhost:8000/api/v1/products/${this.editingProduct.product_id}`,
           {
             method: 'PUT',
             headers: {
@@ -456,7 +456,7 @@ export default {
       try {
         this.loading = true;
         const token = this.getCookie('token');
-        const res = await fetch('https://9ad9-116-110-40-129.ngrok-free.app/api/v1/products', {
+        const res = await fetch('http://localhost:8000/api/v1/products', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -508,7 +508,7 @@ export default {
     async fetchCategories() {
       this.loadingCategories = true;
       try {
-        const res = await fetch('https://9ad9-116-110-40-129.ngrok-free.app/api/v1/categories');
+        const res = await fetch('http://localhost:8000/api/v1/categories');
         if (!res.ok) throw new Error('Lỗi khi lấy danh sách categories');
         this.categories = await res.json();
       } catch (error) {

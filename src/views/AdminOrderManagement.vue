@@ -206,7 +206,7 @@ import SearchBar from '@/components/AdminSearchBar.vue'
 
 // Cấu hình axios instance
 const axiosInstance = axios.create({
-  baseURL: process.env.VUE_APP_API_URL || 'https://9ad9-116-110-40-129.ngrok-free.app/api/v1',
+  baseURL: process.env.VUE_APP_API_URL || 'http://localhost:8000/api/v1',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

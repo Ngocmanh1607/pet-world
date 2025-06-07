@@ -337,7 +337,7 @@ export default {
     async fetchProducts() {
       this.loading = true;
       try {
-        const res = await fetch('https://9ad9-116-110-40-129.ngrok-free.app/api/v1/promotions');
+        const res = await fetch('http://localhost:8000/api/v1/promotions');
         if (!res.ok) throw new Error('Failed to fetch products');
         this.products = await res.json();
       } catch (err) {
@@ -376,7 +376,7 @@ export default {
         this.loading = true;
         const token = this.getCookie('token');
         const res = await fetch(
-          `https://9ad9-116-110-40-129.ngrok-free.app/api/v1/promotions/${this.editingProduct.promotion_id}`,
+          `http://localhost:8000/api/v1/promotions/${this.editingProduct.promotion_id}`,
           {
             method: 'PUT',
             headers: {
@@ -434,7 +434,7 @@ export default {
       try {
         this.loading = true;
         const token = this.getCookie('token');
-        const res = await fetch('https://9ad9-116-110-40-129.ngrok-free.app/api/v1/promotions', {
+        const res = await fetch('http://localhost:8000/api/v1/promotions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

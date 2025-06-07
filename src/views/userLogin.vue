@@ -55,11 +55,12 @@ export default {
         return;
       }
 
-      const url = 'https://9ad9-116-110-40-129.ngrok-free.app/login';
+      const url = 'http://localhost:8000/login';
 
       try {
         const response = await fetch(url, {
           method: 'POST',
+          credentials: 'include', 
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             user_name: this.username,
@@ -75,13 +76,12 @@ export default {
           return;
         }
 
-        const user = result.user;
+        const user = result.user.data;
         const role = user?.role || 'user';
-        console.log(result);
+        console.log(user);
 
         // Lưu session
-        localStorage.setItem('user_name', user?.user_name);
-        localStorage.setItem('role', role);
+        localStorage.setItem('user_name', user?.user);
 
         this.showSuccess = true;
         setTimeout(() => {

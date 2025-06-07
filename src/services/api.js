@@ -3,8 +3,8 @@ import { API_ENDPOINTS } from '@/api/endpoints'
 
 // Tạo instance axios với cấu hình mặc định
 const axiosInstance = axios.create({
-  baseURL: process.env.VUE_APP_API_URL || 'https://9ad9-116-110-40-129.ngrok-free.appapi/v1',
-  timeout: 10000,
+  baseURL: process.env.VUE_APP_API_URL || 'http://localhost:8000/api/v1',
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json'
@@ -167,10 +167,10 @@ export const orderService = {
       handleError(error, 'Không thể tải danh sách đơn hàng')
     }
   },
-  getAllCus: async params => {
+  getAllCus: async () => {
     try {
       const response = await axiosInstance.get(
-        `https://9ad9-116-110-40-129.ngrok-free.app/api/v1/orders/customer/${params}`
+        `http://localhost:8000/api/v1/orders/customer`
       )
       return response.data
     } catch (error) {
