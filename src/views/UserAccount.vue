@@ -48,32 +48,41 @@
           <form v-else>
             <div class="form-group">
               <label>Họ và tên</label>
-              <input type="text" v-model="userData.fullName" disabled />
+              <input type="text" v-model="userData.fullName" :disabled="!isEditing" />
             </div>
 
             <div class="form-group">
               <label>Ngày sinh</label>
-              <input type="text" v-model="userData.dateOfBirth" disabled />
+              <input type="text" v-model="userData.dateOfBirth" :disabled="!isEditing" />
             </div>
 
             <div class="form-group">
               <label>Giới tính</label>
-              <input type="text" v-model="userData.gender" disabled />
+              <input type="text" v-model="userData.gender" :disabled="!isEditing" />
             </div>
 
             <div class="form-group">
               <label>Số điện thoại</label>
-              <input type="text" v-model="userData.phone" disabled />
+              <input type="text" v-model="userData.phone" :disabled="!isEditing" />
             </div>
 
             <div class="form-group">
               <label>Email</label>
-              <input type="email" v-model="userData.email" disabled />
+              <input type="email" v-model="userData.email" :disabled="!isEditing" />
             </div>
 
             <div class="form-group">
               <label>Ngày tham gia</label>
               <input type="text" v-model="userData.joinDate" disabled />
+            </div>
+
+            <!-- Thêm nút Edit và Save -->
+            <div class="form-actions">
+              <button v-if="!isEditing" @click.prevent="startEditing" class="edit-btn"></button>
+              <template v-else>
+                <button @click.prevent="cancelEditing" class="cancel-btn">Hủy</button>
+                <button @click.prevent="saveUserData" class="save-btn">Lưu thay đổi</button>
+              </template>
             </div>
           </form>
         </div>
@@ -116,84 +125,18 @@
 
           <!-- Pagination -->
           <div class="pagination" v-if="totalWishlistPages > 1">
-            <button
-              @click="goToWishlistPage(currentWishlistPage - 1)"
-              :disabled="currentWishlistPage === 1"
-            >
+            <button @click="goToWishlistPage(currentWishlistPage - 1)" :disabled="currentWishlistPage === 1">
               ←
             </button>
-            <button
-              v-for="page in totalWishlistPages"
-              :key="page"
-              @click="goToWishlistPage(page)"
-              :class="{ active: currentWishlistPage === page }"
-            >
+            <button v-for="page in totalWishlistPages" :key="page" @click="goToWishlistPage(page)"
+              :class="{ active: currentWishlistPage === page }">
               {{ page }}
             </button>
-            <button
-              @click="goToWishlistPage(currentWishlistPage + 1)"
-              :disabled="currentWishlistPage === totalWishlistPages"
-            >
+            <button @click="goToWishlistPage(currentWishlistPage + 1)"
+              :disabled="currentWishlistPage === totalWishlistPages">
               →
             </button>
           </div>
-        </div>
-
-        <!-- Thêm nút Edit vào phần thông tin tài khoản -->
-        <div v-if="activeTab === 'account'" class="account-box">
-          <!-- Loading state -->
-          <div v-if="isLoading" class="loading-state">
-            <div class="spinner"></div>
-            <p>Đang tải thông tin...</p>
-          </div>
-
-          <!-- Error state -->
-          <div v-else-if="error" class="error-state">
-            <p class="error-message">{{ error }}</p>
-            <button @click="fetchCustomerData" class="retry-btn">Thử lại</button>
-          </div>
-
-          <!-- Data display -->
-          <form v-else>
-            <div class="form-group">
-              <label>Họ và tên</label>
-              <input type="text" v-model="userData.fullName" :disabled="!isEditing" />
-            </div>
-
-            <div class="form-group">
-              <label>Ngày sinh</label>
-              <input type="text" v-model="userData.dateOfBirth" :disabled="!isEditing" />
-            </div>
-
-            <div class="form-group">
-              <label>Giới tính</label>
-              <input type="text" v-model="userData.gender" :disabled="!isEditing" />
-            </div>
-
-            <div class="form-group">
-              <label>Số điện thoại</label>
-              <input type="text" v-model="userData.phone" :disabled="!isEditing" />
-            </div>
-
-            <div class="form-group">
-              <label>Email</label>
-              <input type="email" v-model="userData.email" :disabled="!isEditing" />
-            </div>
-
-            <div class="form-group">
-              <label>Ngày tham gia</label>
-              <input type="text" v-model="userData.joinDate" disabled />
-            </div>
-
-            <!-- Thêm nút Edit và Save -->
-            <div class="form-actions">
-              <button v-if="!isEditing" @click.prevent="startEditing" class="edit-btn"></button>
-              <template v-else>
-                <button @click.prevent="cancelEditing" class="cancel-btn">Hủy</button>
-                <button @click.prevent="saveUserData" class="save-btn">Lưu thay đổi</button>
-              </template>
-            </div>
-          </form>
         </div>
 
         <div v-if="activeTab === 'history'" class="order-history">
@@ -244,11 +187,7 @@
 
               <div class="order-items">
                 <h4>Sản phẩm trong đơn hàng</h4>
-                <div
-                  class="order-item-detail"
-                  v-for="(item, idx) in selectedOrder.items"
-                  :key="idx"
-                >
+                <div class="order-item-detail" v-for="(item, idx) in selectedOrder.items" :key="idx">
                   <img :src="item.image" alt="Ảnh sản phẩm" class="product-image" />
 
                   <div class="order-info">
@@ -269,10 +208,7 @@
               <div class="order-summary">
                 <div class="summary-row">
                   <span>Tình trạng đơn hàng:</span>
-                  <span
-                    class="status-value"
-                    :class="selectedOrder.status === 'Hoàn thành' ? 'completed' : ''"
-                  >
+                  <span class="status-value" :class="selectedOrder.status === 'Hoàn thành' ? 'completed' : ''">
                     {{ selectedOrder.status }}
                   </span>
                 </div>
@@ -325,10 +261,7 @@
                   <div class="status-label">
                     <i class="fas fa-truck-moving"></i> Tình trạng đơn hàng:
                   </div>
-                  <span
-                    class="status-value"
-                    :class="order.status === 'Hoàn thành' ? 'completed' : ''"
-                  >
+                  <span class="status-value" :class="order.status === 'Hoàn thành' ? 'completed' : ''">
                     {{ order.status }}
                   </span>
                 </div>
@@ -352,11 +285,7 @@
 
               <template v-for="page in orderTotalPages" :key="page">
                 <!-- Show first page -->
-                <button
-                  v-if="page === 1"
-                  :class="{ active: orderCurrentPage === 1 }"
-                  @click="orderCurrentPage = 1"
-                >
+                <button v-if="page === 1" :class="{ active: orderCurrentPage === 1 }" @click="orderCurrentPage = 1">
                   1
                 </button>
 
@@ -364,36 +293,23 @@
                 <span v-if="page === 2 && orderCurrentPage > 3">...</span>
 
                 <!-- Show current page and neighbors -->
-                <button
-                  v-if="
-                    page !== 1 && page !== orderTotalPages && Math.abs(page - orderCurrentPage) <= 1
-                  "
-                  :class="{ active: orderCurrentPage === page }"
-                  @click="orderCurrentPage = page"
-                >
+                <button v-if="
+                  page !== 1 && page !== orderTotalPages && Math.abs(page - orderCurrentPage) <= 1
+                " :class="{ active: orderCurrentPage === page }" @click="orderCurrentPage = page">
                   {{ page }}
                 </button>
 
                 <!-- Show dots if needed -->
-                <span v-if="page === orderTotalPages - 1 && orderCurrentPage < orderTotalPages - 2"
-                  >...</span
-                >
+                <span v-if="page === orderTotalPages - 1 && orderCurrentPage < orderTotalPages - 2">...</span>
 
                 <!-- Show last page -->
-                <button
-                  v-if="page === orderTotalPages"
-                  :class="{ active: orderCurrentPage === orderTotalPages }"
-                  @click="orderCurrentPage = orderTotalPages"
-                >
+                <button v-if="page === orderTotalPages" :class="{ active: orderCurrentPage === orderTotalPages }"
+                  @click="orderCurrentPage = orderTotalPages">
                   {{ orderTotalPages }}
                 </button>
               </template>
 
-              <button
-                class="next-btn"
-                @click="nextOrderPage"
-                :disabled="orderCurrentPage === orderTotalPages"
-              >
+              <button class="next-btn" @click="nextOrderPage" :disabled="orderCurrentPage === orderTotalPages">
                 <i class="fas fa-chevron-right"></i>
               </button>
             </div>
@@ -437,16 +353,9 @@
             <div class="form-group">
               <label>Mật khẩu hiện tại <span class="required">*</span></label>
               <div class="password-field">
-                <input
-                  :type="showCurrentPassword ? 'text' : 'password'"
-                  v-model="passwordData.current_password"
-                  required
-                />
-                <button
-                  type="button"
-                  class="toggle-password"
-                  @click="showCurrentPassword = !showCurrentPassword"
-                >
+                <input :type="showCurrentPassword ? 'text' : 'password'" v-model="passwordData.current_password"
+                  required />
+                <button type="button" class="toggle-password" @click="showCurrentPassword = !showCurrentPassword">
                   <i :class="showCurrentPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
                 </button>
               </div>
@@ -455,18 +364,9 @@
             <div class="form-group">
               <label>Mật khẩu mới <span class="required">*</span></label>
               <div class="password-field">
-                <input
-                  :type="showNewPassword ? 'text' : 'password'"
-                  v-model="passwordData.new_password"
-                  required
-                  pattern=".{6,}"
-                  title="Mật khẩu phải có ít nhất 6 ký tự"
-                />
-                <button
-                  type="button"
-                  class="toggle-password"
-                  @click="showNewPassword = !showNewPassword"
-                >
+                <input :type="showNewPassword ? 'text' : 'password'" v-model="passwordData.new_password" required
+                  pattern=".{6,}" title="Mật khẩu phải có ít nhất 6 ký tự" />
+                <button type="button" class="toggle-password" @click="showNewPassword = !showNewPassword">
                   <i :class="showNewPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
                 </button>
               </div>
@@ -476,17 +376,9 @@
             <div class="form-group">
               <label>Xác nhận mật khẩu mới <span class="required">*</span></label>
               <div class="password-field">
-                <input
-                  :type="showConfirmPassword ? 'text' : 'password'"
-                  v-model="passwordData.confirm_password"
-                  required
-                  :class="{ 'error-input': !passwordsMatch && passwordData.confirm_password }"
-                />
-                <button
-                  type="button"
-                  class="toggle-password"
-                  @click="showConfirmPassword = !showConfirmPassword"
-                >
+                <input :type="showConfirmPassword ? 'text' : 'password'" v-model="passwordData.confirm_password"
+                  required :class="{ 'error-input': !passwordsMatch && passwordData.confirm_password }" />
+                <button type="button" class="toggle-password" @click="showConfirmPassword = !showConfirmPassword">
                   <i :class="showConfirmPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
                 </button>
               </div>
@@ -758,25 +650,25 @@ const fetchOrders = async () => {
         const orderItems =
           order.items && Array.isArray(order.items) && order.items.length > 0
             ? order.items.map(item => ({
-                product_id: item.product_id || '',
-                category: item.category || 'Sản phẩm',
-                name: item.name || 'Sản phẩm chưa xác định',
-                quantity: item.quantity || '0',
-                count: item.count || '1',
-                price: item.price || '0',
-                image: item.image || 'https://via.placeholder.com/150'
-              }))
+              product_id: item.product_id || '',
+              category: item.category || 'Sản phẩm',
+              name: item.name || 'Sản phẩm chưa xác định',
+              quantity: item.quantity || '0',
+              count: item.count || '1',
+              price: item.price || '0',
+              image: item.image || 'https://via.placeholder.com/150'
+            }))
             : [
-                {
-                  product_id: order.product_id || '',
-                  category: order.category || 'Đơn hàng',
-                  name: order.name || `Đơn hàng #${order.order_id}`,
-                  quantity: order.quantity || '0',
-                  count: order.count || '1',
-                  price: formatPrice(order.price) || '0',
-                  image: order.image || 'https://via.placeholder.com/150'
-                }
-              ]
+              {
+                product_id: order.product_id || '',
+                category: order.category || 'Đơn hàng',
+                name: order.name || `Đơn hàng #${order.order_id}`,
+                quantity: order.quantity || '0',
+                count: order.count || '1',
+                price: formatPrice(order.price) || '0',
+                image: order.image || 'https://via.placeholder.com/150'
+              }
+            ]
 
         return {
           id: order.order_id,
@@ -1569,11 +1461,11 @@ const logout = () => {
   border-radius: 50%;
 }
 
-input:checked + .toggle-slider {
+input:checked+.toggle-slider {
   background-color: #ff7c00;
 }
 
-input:checked + .toggle-slider:before {
+input:checked+.toggle-slider:before {
   transform: translateX(26px);
 }
 
@@ -2231,6 +2123,7 @@ input:checked + .toggle-slider:before {
   color: #666;
   margin: 0 5px;
 }
+
 .password-field {
   position: relative;
   width: 100%;
